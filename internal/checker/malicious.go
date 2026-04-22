@@ -82,13 +82,9 @@ func (m Malicious) Run(ctx context.Context, in CheckInput) (CheckOutput, error) 
 	if err := json.Unmarshal(raw, &out); err != nil {
 		return CheckOutput{}, fmt.Errorf("parse opengrep json: %w", err)
 	}
-	threshold := finding.ParseSeverity(cfg.SeverityThreshold).Rank()
 	findings := make([]finding.Finding, 0, len(out.Results))
 	for _, r := range out.Results {
 		sev := mapSemgrepSeverity(r.Extra.Severity)
-		if sev.Rank() < threshold && cfg.Mode == "block" {
-			// keep as informational; the gate will drop blocking from these
-		}
 		findings = append(findings, finding.Finding{
 			Check:      "malicious_code",
 			RuleID:     r.CheckID,

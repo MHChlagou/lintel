@@ -5,10 +5,11 @@ package gate
 import (
 	"strings"
 
+	"github.com/bmatcuk/doublestar/v4"
+
 	"github.com/aegis-sec/aegis/internal/config"
 	"github.com/aegis-sec/aegis/internal/filter"
 	"github.com/aegis-sec/aegis/internal/finding"
-	"github.com/bmatcuk/doublestar/v4"
 )
 
 // Apply runs all filter layers in one pass and returns the mutated findings.

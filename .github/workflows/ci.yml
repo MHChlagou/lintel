@@ -153,8 +153,10 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
       - name: Run govulncheck
+        # Pinned to v1.1.4 — the last release that supports Go 1.22.
+        # Upgrade when we move go.mod past Go 1.22.
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
+          go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
           govulncheck ./...
 
   self-smoke:
