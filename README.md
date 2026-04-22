@@ -7,7 +7,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/MHChlagou/aegis)](https://goreportcard.com/report/github.com/MHChlagou/aegis)
 [![Go Reference](https://pkg.go.dev/badge/github.com/MHChlagou/aegis.svg)](https://pkg.go.dev/github.com/MHChlagou/aegis)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/MHChlagou/aegis?sort=semver&display_name=tag)](https://github.com/MHChlagou/aegis/releases/latest)
 [![Go version](https://img.shields.io/github/go-mod/go-version/MHChlagou/aegis)](go.mod)
 [![Docs](https://img.shields.io/badge/docs-mhchlagou.github.io%2Faegis-blue)](https://MHChlagou.github.io/aegis/)
 
