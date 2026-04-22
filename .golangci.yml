@@ -1,6 +1,9 @@
 run:
   timeout: 5m
-  go: "1.25"
+  # This is the Go version the linter analyzes against, not the runtime version.
+  # Must be <= the Go version golangci-lint itself was built with (v1.61.0 = 1.23).
+  # Bumping the actual Go toolchain (ci.yml, go.mod) is independent of this.
+  go: "1.23"
   tests: true
 
 linters:
