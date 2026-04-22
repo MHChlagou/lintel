@@ -1,0 +1,47 @@
+name: Close stale issues and PRs
+
+# Runs on a schedule and tags inactive issues/PRs, then closes them after a
+# further grace period. Uses only repository metadata; no user-supplied fields.
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: stale
+  cancel-in-progress: false
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9.1.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-issue-stale: 60
+          days-before-issue-close: 14
+          days-before-pr-stale: 30
+          days-before-pr-close: 14
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: "pinned,security,roadmap"
+          exempt-pr-labels: "pinned,security,work-in-progress"
+          stale-issue-message: |
+            This issue has been inactive for 60 days. It will be closed in
+            14 days unless there is further activity. Thanks for contributing.
+          stale-pr-message: |
+            This PR has been inactive for 30 days. It will be closed in
+            14 days unless there is further activity. Please rebase on main
+            and push a comment to keep it open.
+          close-issue-message: |
+            Closing due to inactivity. Please reopen if the issue still
+            applies and we will revisit it.
+          close-pr-message: |
+            Closing due to inactivity. Feel free to reopen when you are ready
+            to continue.

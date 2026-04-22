@@ -1,0 +1,20 @@
+# CODEOWNERS — see https://docs.github.com/en/repositories/managing-your-repositories-settings-and-security/customizing-your-repository/about-code-owners
+#
+# Each line is a file pattern followed by one or more owners.
+# The last matching pattern takes precedence.
+
+# Default owner for everything in the repo.
+*                                   @MHChlagou
+
+# Supply-chain and binary-resolution paths require extra review.
+/internal/resolve/                  @MHChlagou
+/internal/checker/                  @MHChlagou
+/internal/config/defaults_spec.go   @MHChlagou
+/internal/cli/run.go                @MHChlagou
+
+# CI / release automation.
+/.github/workflows/                 @MHChlagou
+/.github/workflows/release.yml      @MHChlagou
+
+# Docs.
+/docs/                              @MHChlagou

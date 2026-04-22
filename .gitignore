@@ -1,0 +1,14 @@
+/bin/
+/dist/
+coverage.out
+*.test
+.aegis/overrides.log
+.DS_Store
+
+# Docs (MkDocs) build output
+/docs/site/
+/docs/.cache/
+
+# Python bytecode (from local docs builds)
+__pycache__/
+*.pyc

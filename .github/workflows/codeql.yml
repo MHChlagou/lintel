@@ -1,0 +1,52 @@
+name: CodeQL
+
+# Static analysis for Go. No untrusted event fields are interpolated into run:
+# steps, and every third-party action is SHA-pinned to a reviewed version.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "30 5 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (Go)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@ddccb873888234080c89c5575b6a6da54c9c6a5e # v3.28.7
+        with:
+          languages: go
+          queries: +security-and-quality
+
+      - name: Build
+        run: go build ./...
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@ddccb873888234080c89c5575b6a6da54c9c6a5e # v3.28.7
+        with:
+          category: "/language:go"

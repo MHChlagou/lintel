@@ -1,0 +1,327 @@
+# Aegis
+
+*The shield your commits pass through.*
+
+[![CI](https://github.com/aegis-sec/aegis/actions/workflows/ci.yml/badge.svg)](https://github.com/aegis-sec/aegis/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/aegis-sec/aegis/actions/workflows/codeql.yml/badge.svg)](https://github.com/aegis-sec/aegis/actions/workflows/codeql.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/aegis-sec/aegis)](https://goreportcard.com/report/github.com/aegis-sec/aegis)
+[![Go Reference](https://pkg.go.dev/badge/github.com/aegis-sec/aegis.svg)](https://pkg.go.dev/github.com/aegis-sec/aegis)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/aegis-sec/aegis?sort=semver&display_name=tag)](https://github.com/aegis-sec/aegis/releases/latest)
+[![Go version](https://img.shields.io/github/go-mod/go-version/aegis-sec/aegis)](go.mod)
+[![Docs](https://img.shields.io/badge/docs-aegis--sec.github.io-blue)](https://aegis-sec.github.io/aegis/)
+
+A single-binary, shift-left security orchestrator that runs as a Git hook (and in CI). One declarative spec file, zero runtime dependencies, and the best-in-class OSS scanners you already trust.
+
+**[Documentation](https://aegis-sec.github.io/aegis/)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[Security](SECURITY.md)**
+
+---
+
+## Introduction
+
+Most teams want shift-left security — secrets, SAST, SCA, lint, format — on every commit. The existing landscape forces a choice:
+
+- **Glue it yourself.** Husky + lint-staged + N tools, each with its own config. Brittle, drifts between repos, breaks when anyone upgrades anything.
+- **Adopt a SaaS.** Expensive, opaque, and almost always a "black box" running rules you can't audit.
+
+Aegis is a third path: **one Go binary** that coordinates the scanners you choose, driven by one YAML file, with a tight CLI and strong supply-chain hygiene built in.
+
+---
+
+## What Aegis Is (and Isn't)
+
+Aegis **is**:
+
+- A single static binary (Linux/macOS/Windows on amd64/arm64).
+- A declarative spec (`aegis.yaml`) describing stacks, scanners, gates, and ignores.
+- A Git hook manager with an opinionated CLI: `init`, `install`, `run`, `doctor`, `baseline`.
+- A reporter that normalizes heterogeneous scanner output into one `Finding` shape, emitted as pretty text or JSON.
+
+Aegis **is not**:
+
+- A scanner. It contains no regexes, rule engines, or CVE databases.
+- A package manager. You bring your own scanner binaries (v1). Aegis verifies them.
+- A CI server. It runs *in* CI by being invoked from one.
+- A secret vault, SBOM platform, or compliance dashboard.
+
+Currently wired engines: `gitleaks` (secrets), `opengrep` (SAST), `osv-scanner` (SCA), `biome`, `ruff`, `golangci-lint`, `gofmt`, `shellcheck`.
+
+---
+
+## How to Use
+
+### Install the binary
+
+Download a release binary for your platform from GitHub Releases (or `go install github.com/aegis-sec/aegis/cmd/aegis@latest` for development), and put it on `$PATH`.
+
+Verify:
+
+```bash
+aegis version
+# aegis v0.1.0  schema=1  commit=abc123  built=2026-04-21T…
+```
+
+### Bootstrap a repo
+
+```bash
+cd my-repo
+aegis init          # writes .aegis/aegis.yaml with secure defaults
+aegis install       # writes .git/hooks/{pre-commit, commit-msg, pre-push}
+aegis doctor        # verifies scanner binaries + sha256 hashes
+```
+
+`aegis init` never overwrites an existing spec (pass `--force` to replace). `aegis install` never overwrites a foreign hook (pass `--force` to replace).
+
+### Install the scanners (your choice of engines)
+
+Aegis verifies each scanner's sha256 before running it. The default spec names them; you install them:
+
+```bash
+# Examples — use the real releases for your platform
+mkdir -p ~/.aegis/bin
+curl -fsSL https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/... -o ~/.aegis/bin/gitleaks && chmod +x ~/.aegis/bin/gitleaks
+# …same for opengrep, osv-scanner, biome/ruff/golangci-lint as your stack needs
+```
+
+Then pin their hashes in `aegis.yaml` under `binaries.<name>.sha256.<os>_<arch>`. `aegis doctor` tells you what's missing.
+
+### Run
+
+Hooks dispatch automatically on `git commit` / `git push`. Manual invocations:
+
+```bash
+aegis run                        # run every enabled check
+aegis run --hook pre-commit      # run the pre-commit hook's configured set
+aegis run --check secrets        # run a single check
+aegis run --output json          # machine-readable output
+aegis fmt                        # shortcut for --check format
+```
+
+### Baseline and ignores (for adopting on a legacy repo)
+
+```bash
+aegis baseline                    # snapshot current findings into .aegis/baseline.json
+aegis ignore <rule-id> \          # add to .aegis/allowlist.yaml
+  --path 'src/legacy/**' --reason "pending rewrite, JIRA-1021"
+```
+
+Inline ignores (per-language comments on the flagged or preceding line):
+
+```go
+// aegis:ignore-secret  reason="test fixture, not a real key"
+testKey := "AKIAFAKEFAKEFAKE1234"
+```
+
+```python
+# aegis:ignore-rule=SQLi.raw-concat  reason="hardened elsewhere"
+```
+
+A reason is **mandatory** — an inline ignore without one is itself a finding.
+
+### Emergency bypass
+
+```bash
+AEGIS_SKIP=secrets,lint \
+AEGIS_REASON="hotfix for incident #9912" \
+  git commit -m "..."
+```
+
+Skipped checks are logged to `.aegis/overrides.log` with user, timestamp, commit hash, and reason. If `override.protect_secrets: true`, the `secrets` check is always enforced, even with `AEGIS_SKIP=all`.
+
+### Uninstall
+
+```bash
+aegis uninstall          # removes only hooks carrying the aegis marker
+```
+
+---
+
+## How to Configure
+
+All behavior lives in `.aegis/aegis.yaml`. `aegis init` writes a secure-by-default template. Every key is optional except `version`.
+
+### Minimal example
+
+```yaml
+version: 1
+
+checks:
+  secrets:        { enabled: true, mode: block }
+  malicious_code: { enabled: true, mode: block }
+  dependencies:   { enabled: true, mode: block, block_severity: [CRITICAL, HIGH] }
+  lint:           { enabled: true, mode: warn }
+  format:         { enabled: true, mode: check }
+
+hooks:
+  pre-commit: { checks: [secrets, malicious_code, lint, format] }
+  pre-push:   { checks: [secrets, dependencies], fail_fast: true }
+```
+
+### Key sections
+
+**`binaries`** — declare the scanners Aegis may execute. Each needs a `version`, optional `path`, per-platform `sha256`, and `install_hint`:
+
+```yaml
+binaries:
+  gitleaks:
+    command: gitleaks
+    version: "8.28.0"
+    sha256:
+      linux_amd64:  "abc123…"
+      darwin_arm64: "def456…"
+    install_hint: "https://github.com/gitleaks/gitleaks/releases/tag/v8.28.0"
+```
+
+Resolution order: `binaries.X.path` → `$AEGIS_BIN_DIR/X` → `~/.aegis/bin/X` → `$PATH`. Sha256 is verified on every run.
+
+**`checks`** — one subtree per check. Each supports `enabled`, `mode` (`block`/`warn`/`off`; `fix`/`check`/`off` for format), an `engine` where applicable, and check-specific knobs like `warn_paths`, `severity_threshold`, `block_severity`, `ignore_cves`.
+
+**`scope`** — which files are scanned. Staged-only by default; globbed `exclude_paths` apply globally; `full_scan_for: [dependencies]` forces full-tree for specified checks.
+
+**`hooks`** — map each hook (`pre-commit`, `pre-push`, `commit-msg`) to a check list and `fail_fast` flag.
+
+**`output`** — `format: pretty|json|sarif|junit`, `group_by`, `color`, `verbosity`.
+
+**`override`** — bypass controls: `env_var` (default `AEGIS_SKIP`), `require_reason`, `log_file`, `protect_secrets`, `allow_no_verify`.
+
+**`performance`** — `parallel: auto|<int>`, per-check and total timeouts, cache settings.
+
+**`strict_versions: true`** — refuses to run any binary that has no sha256 declared for the current platform. Recommended.
+
+The full schema is documented inline in [`docs/docs/reference/spec.md`](docs/docs/reference/spec.md), and rendered at the [documentation site](https://aegis-sec.github.io/aegis/configuration/).
+
+### Environment variables
+
+| Variable         | Purpose                                                   |
+|------------------|-----------------------------------------------------------|
+| `AEGIS_SKIP`     | Comma-separated checks to skip (e.g. `secrets,lint`, or `all`) |
+| `AEGIS_REASON`   | Required justification when `override.require_reason: true` |
+| `AEGIS_BIN_DIR`  | Extra dir searched for scanner binaries                    |
+| `AEGIS_CONFIG`   | Alternate path to the spec file                            |
+| `AEGIS_CACHE_DIR`| Override cache directory                                   |
+| `AEGIS_NO_COLOR` | Disable colored output (`NO_COLOR` also honored)           |
+
+---
+
+## How It Works
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    aegis (single binary)                 │
+│                                                          │
+│  CLI → Config → Detector → Resolver → Runner             │
+│                                 (sha256-verified exec)   │
+│                                 ↓                        │
+│                        ┌───────────────────────┐         │
+│                        │ gitleaks  opengrep    │         │
+│                        │ osv-scanner  biome    │         │
+│                        │ ruff  golangci-lint … │         │
+│                        └───────────────────────┘         │
+│                                 ↓                        │
+│             Normalize → Filter → Gate → Report → Exit    │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Execution pipeline
+
+When you `git commit`, the pre-commit hook invokes `aegis run --hook pre-commit`, which runs nine stages:
+
+1. **Load spec.** Parse `.aegis/aegis.yaml`, apply defaults, validate (e.g., reject relative paths in `binaries.X.path`).
+2. **Detect staged files.** `git diff --cached --name-only -z`, NUL-split for odd paths.
+3. **Detect stacks.** Explicit `project.type` first; otherwise walk manifests (`package.json` + lock variant, `pom.xml`, `go.mod`, `pyproject.toml`, `Cargo.toml`, …); extension-count fallback if zero manifests match.
+4. **Resolve binaries.** Locate each scanner via the resolution order; read-into-sha256-stream; compare to spec's expected hash for `<os>_<arch>`. Mismatch → refuse to run. No hash + `strict_versions: true` → refuse. Memoized for the rest of the process.
+5. **Plan.** Drop disabled/off checks; apply `AEGIS_SKIP` (refused for `secrets` if `protect_secrets: true`); write to `overrides.log` if skipping.
+6. **Execute, in parallel.** Each check runs in its own goroutine, bounded by `performance.parallel` and a per-check `context.WithTimeout`. `fail_fast: true` cancels sibling contexts on the first blocking finding.
+7. **Normalize.** Each adapter decodes its scanner's JSON or text output into the common `Finding` shape: `Check`, `RuleID`, `Severity`, `File`, `Line`, `Message`, `Snippet`, `FixSuggest`, `Engine`.
+8. **Filter + gate.** Apply allowlist → baseline → `warn_paths` (demote) → inline ignores → per-check severity threshold → mode. Decide `Blocking` per finding.
+9. **Report.** Sort findings deterministically by `(check, file, line, rule_id)`, render pretty or JSON, write to `output.report_file` if configured, exit with the right code.
+
+### Exit codes
+
+| Code | Meaning                                              |
+|------|------------------------------------------------------|
+| 0    | Success — no blocking findings                       |
+| 1    | Blocking findings detected                           |
+| 2    | Configuration error                                  |
+| 3    | Binary resolution or verification failure            |
+| 4    | Scanner crashed or timed out                         |
+| 5    | Internal error                                       |
+| 130  | Interrupted (SIGINT)                                 |
+
+### Supply-chain model
+
+Aegis is itself a supply-chain-sensitive tool (it executes external binaries at developer privilege). Mitigations:
+
+- **Mandatory sha256** on every external binary, on every run.
+- **No auto-download by default.** You install scanners; Aegis verifies them.
+- **Spec path limits.** `binaries.X.path` must be absolute or home-relative; relative paths into the repo are rejected (defense against a malicious PR slipping in a vendored binary).
+- **Signed Aegis releases.** Keyless cosign signatures on every artifact.
+- **Capability minimization.** No outbound network except when `dependencies.offline: false` (OSV DB fetch) or `aegis install <tool>` (explicit opt-in, v1.1+).
+- **No telemetry.**
+
+### Concurrency + determinism
+
+Scanners run concurrently for speed. Findings are sorted before output, so parallelism never changes the report. The `-race` flag in CI guards against regressions.
+
+### Performance targets
+
+| Metric                                               | Budget        |
+|------------------------------------------------------|---------------|
+| `aegis run --hook pre-commit` p95 on 10k staged LOC  | < 5 seconds   |
+| sha256 verify (per binary, cached)                   | < 50 ms       |
+| Spec parse + validate                                | < 20 ms       |
+| Cold start                                           | < 150 ms      |
+
+---
+
+## Development
+
+```bash
+make ci          # vet + gofmt check + test -race + build
+make test-race   # tests with the race detector
+make smoke       # build and run `aegis init` in a temp repo
+make build       # binary → bin/aegis
+```
+
+Cross-compile:
+
+```bash
+GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -trimpath -o dist/aegis ./cmd/aegis
+```
+
+CI runs on every push and PR: matrix tests on Linux/macOS/Windows, golangci-lint, cross-platform builds with sha256 sidecars, govulncheck, CodeQL static analysis, and an end-to-end self-smoke against the built binary. See [`.github/workflows/`](.github/workflows/).
+
+---
+
+## Project layout
+
+```
+aegis/
+├── cmd/aegis/        # main package
+├── internal/         # all logic (cli, config, checker, runner, filter, gate, …)
+├── testdata/         # canned scanner outputs for adapter tests
+├── examples/         # reference aegis.yaml configs for common stacks
+├── docs/             # MkDocs-Material documentation site
+└── .github/          # workflows, issue/PR templates, CODEOWNERS
+```
+
+See [`docs/docs/architecture.md`](docs/docs/architecture.md) for the dependency map between packages.
+
+---
+
+## Community
+
+- **Documentation:** <https://aegis-sec.github.io/aegis/>
+- **Discussions:** [GitHub Discussions](https://github.com/aegis-sec/aegis/discussions) — questions, setup help, roadmap.
+- **Issues:** [GitHub Issues](https://github.com/aegis-sec/aegis/issues) — bugs, feature requests.
+- **Security reports:** [GitHub Private Vulnerability Reporting](https://github.com/aegis-sec/aegis/security/advisories/new) — see [`SECURITY.md`](SECURITY.md).
+- **Contributing:** [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+- **Release notes:** [`CHANGELOG.md`](CHANGELOG.md).
+
+---
+
+## License
+
+Aegis is released under the [MIT License](LICENSE). By contributing, you agree that your contributions will be licensed under the same terms.

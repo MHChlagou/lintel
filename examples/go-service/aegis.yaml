@@ -1,0 +1,92 @@
+# Aegis config for a single Go service.
+# Pre-commit: fast local checks (format, lint, secrets).
+# Pre-push: dependencies and malicious-code SAST.
+
+schema: 1
+
+stacks:
+  auto: true
+  include: [go]
+
+checks:
+  secrets:
+    enabled: true
+    severity_floor: error
+  malicious_code:
+    enabled: true
+  dependencies:
+    enabled: true
+  lint:
+    enabled: true
+    scanners:
+      go: golangci-lint
+  format:
+    enabled: true
+    scanners:
+      go: gofmt
+
+gate:
+  fail_on:
+    error: 0
+    warn: 20
+    info: -1
+
+paths:
+  exclude:
+    - "vendor/**"
+    - "**/*.generated.go"
+    - "**/mocks_*.go"
+  warn_paths:
+    - "internal/testutil/**"
+
+timeouts:
+  per_check: 30s
+  total: 120s
+
+concurrency:
+  max_parallel: 4
+
+strict_versions: true
+protect_secrets: true
+
+scanners:
+  gitleaks:
+    path: gitleaks
+    version: "8.18.2"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  opengrep:
+    path: opengrep
+    version: "1.0.0"
+    rules:
+      - "p/security-audit"
+      - "p/golang"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  osv-scanner:
+    path: osv-scanner
+    version: "1.9.0"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  golangci-lint:
+    path: golangci-lint
+    version: "1.61.0"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  gofmt:
+    path: gofmt
+    version: ""
+
+hooks:
+  pre_commit:
+    checks: [secrets, lint, format]
+  pre_push:
+    checks: [dependencies, malicious_code]

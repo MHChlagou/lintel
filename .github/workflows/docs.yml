@@ -1,0 +1,97 @@
+name: Docs
+
+# Builds and deploys the MkDocs-Material site to GitHub Pages.
+# No user-controlled event fields are interpolated into run: steps.
+# All third-party actions are SHA-pinned to audited versions.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+      - "mkdocs.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+      - "mkdocs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Install dependencies
+        working-directory: docs
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build site
+        working-directory: docs
+        run: mkdocs build --strict
+
+      - name: Upload site artifact
+        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        with:
+          name: site
+          path: docs/site
+          retention-days: 7
+
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Install dependencies
+        working-directory: docs
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Deploy via mike
+        working-directory: docs
+        run: |
+          mike deploy --push --update-aliases main latest
+          mike set-default --push latest

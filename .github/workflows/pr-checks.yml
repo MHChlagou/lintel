@@ -1,0 +1,72 @@
+name: PR Checks
+
+# This workflow only reads PR metadata and applies labels; it never evaluates
+# user-controlled strings inside `run:` steps. Third-party actions are SHA-pinned.
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  semantic-title:
+    name: Conventional PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^[a-z].+[^.]$
+          subjectPatternError: |
+            The subject after the colon should start with lowercase and must
+            not end with a period. Example - feat(runner): parallelize scanners
+
+  size-label:
+    name: Size label
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Apply size label
+        uses: codelytv/pr-size-labeler@4ec67706cd878fbc1c8db0a5dcd28b6bb412e85a # v1.10.2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: size/xs
+          xs_max_size: "20"
+          s_label: size/s
+          s_max_size: "100"
+          m_label: size/m
+          m_max_size: "500"
+          l_label: size/l
+          l_max_size: "1000"
+          xl_label: size/xl
+          fail_if_xl: "false"
+          message_if_xl: |
+            This PR changes more than 1000 lines. Consider splitting it into
+            smaller focused PRs for easier review.

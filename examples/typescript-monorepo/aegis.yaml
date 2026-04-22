@@ -1,0 +1,91 @@
+# Aegis config for a TypeScript monorepo (pnpm or yarn workspaces).
+# Biome handles both lint and format. Dependencies are checked on pre-push.
+
+schema: 1
+
+stacks:
+  auto: true
+  include: [npm]
+
+checks:
+  secrets:
+    enabled: true
+    severity_floor: error
+  malicious_code:
+    enabled: true
+  dependencies:
+    enabled: true
+  lint:
+    enabled: true
+    scanners:
+      npm: biome
+  format:
+    enabled: true
+    scanners:
+      npm: biome
+
+gate:
+  fail_on:
+    error: 0
+    warn: 50       # monorepos accumulate warnings; tune down over time
+    info: -1
+
+paths:
+  exclude:
+    - "node_modules/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/*.d.ts"
+    - "**/coverage/**"
+  warn_paths:
+    - "packages/*/test/**"
+    - "e2e/**"
+
+timeouts:
+  per_check: 60s
+  total: 180s
+
+concurrency:
+  max_parallel: 4
+
+strict_versions: true
+protect_secrets: true
+
+scanners:
+  gitleaks:
+    path: gitleaks
+    version: "8.18.2"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  opengrep:
+    path: opengrep
+    version: "1.0.0"
+    rules:
+      - "p/security-audit"
+      - "p/typescript"
+      - "p/react"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  osv-scanner:
+    path: osv-scanner
+    version: "1.9.0"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  biome:
+    path: biome
+    version: "1.9.4"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+hooks:
+  pre_commit:
+    checks: [secrets, lint, format]
+  pre_push:
+    checks: [dependencies, malicious_code]

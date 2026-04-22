@@ -1,0 +1,89 @@
+name: Bug report
+description: Report a defect in Aegis.
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Please fill in as much
+        of the form below as you can — it helps us reproduce and fix the issue
+        quickly.
+
+        **Not for security issues.** If you believe you have found a security
+        problem, please use
+        [GitHub Private Vulnerability Reporting](https://github.com/aegis-sec/aegis/security/advisories/new)
+        instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: Aegis version
+      description: Output of `aegis version`.
+      placeholder: "aegis 0.1.0  schema=1  commit=abc123  built=2026-04-22"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS and architecture
+      placeholder: "Ubuntu 22.04 / amd64"
+    validations:
+      required: true
+
+  - type: input
+    id: go-version
+    attributes:
+      label: Go version (only if building from source)
+      placeholder: "go1.22.3"
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the behavior you saw.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps we can follow to reproduce. A tiny public repo helps a lot.
+      placeholder: |
+        1. `git init demo && cd demo`
+        2. `aegis init`
+        3. `…`
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Your `aegis.yaml` (redact anything sensitive)
+      render: yaml
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Relevant output
+      description: Command output with `--verbose` when possible. Please redact secrets.
+      render: shell
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: This is not a security issue (those go to Private Vulnerability Reporting).
+          required: true

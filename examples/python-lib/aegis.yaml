@@ -1,0 +1,90 @@
+# Aegis config for a Python library using ruff + gitleaks + osv-scanner.
+# Ruff handles both lint and format; no separate Python formatter is wired.
+
+schema: 1
+
+stacks:
+  auto: true
+  include: [python]
+
+checks:
+  secrets:
+    enabled: true
+    severity_floor: error
+  malicious_code:
+    enabled: true
+  dependencies:
+    enabled: true
+  lint:
+    enabled: true
+    scanners:
+      python: ruff
+  format:
+    enabled: true
+    scanners:
+      python: ruff
+
+gate:
+  fail_on:
+    error: 0
+    warn: 15
+    info: -1
+
+paths:
+  exclude:
+    - ".venv/**"
+    - "venv/**"
+    - "build/**"
+    - "dist/**"
+    - "**/__pycache__/**"
+  warn_paths:
+    - "tests/**"
+    - "docs/**"
+
+timeouts:
+  per_check: 30s
+  total: 90s
+
+concurrency:
+  max_parallel: 4
+
+strict_versions: true
+protect_secrets: true
+
+scanners:
+  gitleaks:
+    path: gitleaks
+    version: "8.18.2"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  opengrep:
+    path: opengrep
+    version: "1.0.0"
+    rules:
+      - "p/security-audit"
+      - "p/python"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  osv-scanner:
+    path: osv-scanner
+    version: "1.9.0"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+  ruff:
+    path: ruff
+    version: "0.8.0"
+    sha256:
+      linux/amd64: "REPLACE_WITH_UPSTREAM_SHA256"
+      darwin/arm64: "REPLACE_WITH_UPSTREAM_SHA256"
+
+hooks:
+  pre_commit:
+    checks: [secrets, lint, format]
+  pre_push:
+    checks: [dependencies, malicious_code]

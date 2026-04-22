@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Principle of least privilege: a compromised action shouldn't be able to push.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GO_VERSION: "1.22"
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Verify module integrity
+        run: go mod verify
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test (race + coverage)
+        run: go test -race -covermode=atomic -coverprofile=coverage.out ./...
+
+      - name: Upload coverage artifact
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        with:
+          name: coverage
+          path: coverage.out
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Check gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "::error::Unformatted files:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@3cfe3a4abbb849e10058ce4af15d205b6da42804 # v4.0.0
+        with:
+          version: v1.61.0
+          args: --timeout=5m
+
+  build:
+    name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          version="$(git describe --tags --always 2>/dev/null || echo dev)"
+          commit="$(git rev-parse --short HEAD)"
+          date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          ldflags="-s -w \
+            -X github.com/aegis-sec/aegis/internal/version.Version=${version} \
+            -X github.com/aegis-sec/aegis/internal/version.Commit=${commit} \
+            -X github.com/aegis-sec/aegis/internal/version.Date=${date}"
+          ext=""
+          if [ "${GOOS}" = "windows" ]; then ext=".exe"; fi
+          out="dist/aegis-${GOOS}-${GOARCH}${ext}"
+          mkdir -p dist
+          go build -trimpath -ldflags "${ldflags}" -o "${out}" ./cmd/aegis
+          sha256sum "${out}" | tee "${out}.sha256"
+
+      - name: Upload binary
+        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        with:
+          name: aegis-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            dist/aegis-${{ matrix.goos }}-${{ matrix.goarch }}*
+
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: Run govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+  self-smoke:
+    name: Self-smoke test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        with:
+          name: aegis-linux-amd64
+          path: dist
+      - name: Smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x dist/aegis-linux-amd64
+          ./dist/aegis-linux-amd64 version
+          tmp=$(mktemp -d)
+          (cd "${tmp}" && git init -q)
+          ./dist/aegis-linux-amd64 --repo "${tmp}" init
+          test -f "${tmp}/.aegis/aegis.yaml"
+          # Disable scanner-requiring checks so we can validate the pipeline without external binaries.
+          sed -i -e '/^  secrets:/,/^  [a-z]/ s/    enabled: true/    enabled: false/' \
+                 -e '/^  malicious_code:/,/^  [a-z]/ s/    enabled: true/    enabled: false/' \
+                 -e '/^  dependencies:/,/^  [a-z]/ s/    enabled: true/    enabled: false/' \
+                 "${tmp}/.aegis/aegis.yaml"
+          ./dist/aegis-linux-amd64 --repo "${tmp}" run --output json | tee /tmp/out.json
+          python3 -m json.tool < /tmp/out.json >/dev/null
