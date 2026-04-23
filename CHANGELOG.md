@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-23
+
+Adds a verified scanner installer so users no longer have to hand-pin
+SHA256s, and closes the `strict_versions: false` escape hatch that
+prior users fell back on when their manually-installed scanners
+produced "no sha256 for platform" errors.
+
+### Added
+
+- `aegis install <scanner>` — downloads the pinned upstream release,
+  verifies its SHA256 on the wire, extracts the binary, re-verifies it
+  on disk, and places it at `~/.aegis/bin/<name>`.
+- `aegis install --all` — installs every scanner declared in the
+  loaded `aegis.yaml`. Skips `gofmt` (ships with the Go toolchain).
+- Embedded scanner pin database shipped inside the binary
+  (`internal/installer/scanners.yaml`). Covers gitleaks, opengrep,
+  osv-scanner, biome, ruff, golangci-lint, and shellcheck across
+  linux/darwin × amd64/arm64. Each entry pins two hashes:
+  `archive_sha256` (verified at download time) and `binary_sha256`
+  (verified on every scanner invocation, so extraction bugs or pin
+  drift between the two are caught loudly).
+- Resolver pin fallback: when the user's `aegis.yaml` has no
+  `sha256` for a scanner/platform, the resolver consults the embedded
+  pin database instead of refusing outright. Any explicit user pin
+  still wins — the fallback is strictly additive.
+- HTTPS host allowlist for installs. GitHub release infrastructure
+  plus the two vendor CDNs currently in use (`astral.sh`, `biomejs.dev`)
+  are trusted; non-HTTPS and off-list hosts are refused before any
+  bytes are read.
+- `aegis doctor` now prints a count-aware remediation hint after
+  failures: one scanner missing → `run: aegis install <name>`;
+  multiple → `run: aegis install --all`. `gofmt` is special-cased
+  with a "install the Go toolchain" note.
+- Release-engineering tool `scripts/refresh-pins.go` (build-ignored).
+  Downloads every asset declared in `scanners.yaml`, computes both
+  hashes (extracting archives inline), and rewrites the file via
+  minimal textual substitution so the diff review stays hash-only.
+- Release workflow embeds the `CHANGELOG.md` section for the tagged
+  version into GitHub Release notes, appended to the auto-generated
+  PR summary.
+
+### Fixed
+
+- Documented `curl` one-liner for "latest release" download now
+  normalizes `uname -m` to Go's `GOARCH` (`x86_64` → `amd64`,
+  `aarch64` → `arm64`). Previously three of four Unix platform
+  combos 404'd because the upstream asset names use `GOARCH`.
+
 ## [0.1.0] - 2026-04-22
 
 First public release. Implements the v1.0 scope of the project specification.
@@ -79,5 +127,6 @@ per job.
 - External scanner binaries per your `aegis.yaml`. Aegis coordinates them
   but does not bundle or download them - install and pin each one you use.
 
-[Unreleased]: https://github.com/MHChlagou/aegis/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/MHChlagou/aegis/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/MHChlagou/aegis/releases/tag/v0.2.0
 [0.1.0]: https://github.com/MHChlagou/aegis/releases/tag/v0.1.0

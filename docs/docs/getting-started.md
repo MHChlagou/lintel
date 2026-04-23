@@ -13,8 +13,16 @@ This 5-minute walkthrough installs Aegis, wires it into a new Git repository, ru
 === "macOS / Linux"
 
     ```bash
-    # Once releases are published:
-    curl -fsSL https://github.com/MHChlagou/aegis/releases/latest/download/aegis-$(uname -s | tr A-Z a-z)-$(uname -m) -o /usr/local/bin/aegis
+    # Release assets are named with Go's GOOS/GOARCH, so map uname output:
+    os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    arch="$(uname -m)"
+    case "$arch" in
+      x86_64|amd64)   arch=amd64 ;;
+      aarch64|arm64)  arch=arm64 ;;
+      *) echo "unsupported arch: $arch" >&2; exit 1 ;;
+    esac
+    curl -fsSL "https://github.com/MHChlagou/aegis/releases/latest/download/aegis-${os}-${arch}" \
+      -o /usr/local/bin/aegis
     chmod +x /usr/local/bin/aegis
     aegis version
     ```

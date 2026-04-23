@@ -59,6 +59,35 @@ jobs:
           build_one darwin arm64
           build_one windows amd64
 
+      - name: Extract changelog section for this tag
+        id: changelog
+        shell: bash
+        env:
+          # github.ref_name is the pushed tag name (e.g. v0.2.0). Consumed
+          # only via this env var — never interpolated directly into the
+          # shell — to avoid workflow-injection surface.
+          VERSION: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # CHANGELOG.md headings are "## [0.2.0] - YYYY-MM-DD"; strip the
+          # leading "v" from the tag to match.
+          version="${VERSION#v}"
+          notes_file="$(mktemp)"
+
+          awk -v ver="${version}" '
+            $0 ~ "^## \\[" ver "\\]" { in_section = 1; next }
+            in_section && /^## \[/   { exit }
+            in_section               { print }
+          ' CHANGELOG.md > "${notes_file}"
+
+          if [ ! -s "${notes_file}" ]; then
+            echo "no CHANGELOG.md section found for ${version}" >&2
+            printf "See [CHANGELOG.md](https://github.com/%s/blob/%s/CHANGELOG.md) for details.\n" \
+              "${REPO}" "${VERSION}" > "${notes_file}"
+          fi
+          echo "path=${notes_file}" >> "${GITHUB_OUTPUT}"
+
       - name: Sign binaries with cosign (keyless)
         shell: bash
         run: |
@@ -80,4 +109,6 @@ jobs:
         with:
           files: |
             dist/*
+          body_path: ${{ steps.changelog.outputs.path }}
+          append_body: true
           generate_release_notes: true
