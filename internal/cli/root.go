@@ -44,6 +44,7 @@ osv-scanner, biome, ruff, golangci-lint, …) driven by one declarative spec.`,
 		cmdIgnore(),
 		cmdFmt(),
 		cmdExplain(),
+		cmdUpgrade(),
 	)
 	return root
 }

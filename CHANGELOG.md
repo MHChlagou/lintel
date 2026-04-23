@@ -21,6 +21,11 @@ produced "no sha256 for platform" errors.
   on disk, and places it at `~/.aegis/bin/<name>`.
 - `aegis install --all` — installs every scanner declared in the
   loaded `aegis.yaml`. Skips `gofmt` (ships with the Go toolchain).
+- `aegis upgrade` — checks the GitHub Releases API for a newer aegis
+  version and prints the release notes plus a copy-paste upgrade
+  command for your OS and architecture. The command never replaces
+  the installed binary; self-updating verifiers are a larger trust
+  surface than the UX win warrants.
 - Embedded scanner pin database shipped inside the binary
   (`internal/installer/scanners.yaml`). Covers gitleaks, opengrep,
   osv-scanner, biome, ruff, golangci-lint, and shellcheck across
