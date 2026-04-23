@@ -1,4 +1,4 @@
-// Package config parses and validates .aegis/aegis.yaml.
+// Package config parses and validates .lintel/lintel.yaml.
 package config
 
 type Mode string
@@ -11,7 +11,7 @@ const (
 	ModeCheck Mode = "check"
 )
 
-// Spec mirrors aegis.yaml. Unknown fields are tolerated by yaml.v3 default settings.
+// Spec mirrors lintel.yaml. Unknown fields are tolerated by yaml.v3 default settings.
 type Spec struct {
 	Version     int                 `yaml:"version"`
 	Project     Project             `yaml:"project"`

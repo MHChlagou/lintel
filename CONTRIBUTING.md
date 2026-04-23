@@ -1,6 +1,6 @@
-# Contributing to Aegis
+# Contributing to Lintel
 
-Thanks for your interest in making Aegis better. This document describes how
+Thanks for your interest in making Lintel better. This document describes how
 to set up your environment, propose changes, and ship them.
 
 By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
@@ -10,7 +10,7 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 ## Ways to contribute
 
 - **File a bug.** Open an issue using the **Bug report** template. Reproduction
-  steps, OS, Go version, and `aegis version` output are the minimum.
+  steps, OS, Go version, and `lintel version` output are the minimum.
 - **Request a feature.** Use the **Feature request** template. If it fits our
   published roadmap (see [`spec.md`](docs/docs/reference/spec.md) §21), we'll label it
   `roadmap`; otherwise expect a design discussion first.
@@ -26,8 +26,8 @@ You need Go `1.25+` and `make`. Optional but helpful: `golangci-lint`,
 `govulncheck`.
 
 ```bash
-git clone https://github.com/MHChlagou/aegis.git
-cd aegis
+git clone https://github.com/MHChlagou/lintel.git
+cd lintel
 make ci        # fmt + vet + lint + test + build - the same gates CI runs
 ```
 
@@ -35,7 +35,7 @@ Useful targets (see [`Makefile`](Makefile) for the full list):
 
 | target        | purpose                                                   |
 | ------------- | --------------------------------------------------------- |
-| `make build`  | Build the `aegis` binary into `bin/`                      |
+| `make build`  | Build the `lintel` binary into `bin/`                      |
 | `make test`   | `go test -race ./...`                                     |
 | `make lint`   | `gofmt -l .` + `golangci-lint run`                        |
 | `make smoke`  | End-to-end smoke test (init → run) against the built binary |
@@ -96,7 +96,7 @@ Scanner adapters live in `internal/checker/`. A minimal adapter must:
    `Normalize` path and asserts a stable `[]Finding` slice.
 4. Have an entry in `internal/config/defaults_spec.go` under the appropriate
    stack, with **pinned SHA256s** for the upstream binary releases on each
-   supported platform. Do not wire an adapter without hashes - Aegis refuses to
+   supported platform. Do not wire an adapter without hashes - Lintel refuses to
    execute unverified binaries.
 5. Have a docs page under `docs/docs/scanners/`.
 
@@ -104,13 +104,13 @@ Scanner adapters live in `internal/checker/`. A minimal adapter must:
 
 ## Security
 
-This is a security tool. A bug in Aegis can mask real vulnerabilities in
+This is a security tool. A bug in Lintel can mask real vulnerabilities in
 downstream repositories. Be especially careful with:
 
 - **Supply-chain paths** (`internal/resolve`, `internal/checker/*/resolve`): do
   not loosen SHA256 checks, do not accept relative binary paths, do not let the
   `strict_versions` bypass flow silently.
-- **Override / audit logging** (`internal/cli/run.go`, `.aegis/overrides.log`):
+- **Override / audit logging** (`internal/cli/run.go`, `.lintel/overrides.log`):
   every bypass must be recorded with a mandatory reason.
 - **Exit codes**: changes must be reflected in `spec.md` §11.5.
 

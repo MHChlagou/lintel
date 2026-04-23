@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MHChlagou/aegis/internal/detect"
-	"github.com/MHChlagou/aegis/internal/finding"
+	"github.com/MHChlagou/lintel/internal/detect"
+	"github.com/MHChlagou/lintel/internal/finding"
 )
 
 type Deps struct{}

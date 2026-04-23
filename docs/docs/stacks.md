@@ -1,10 +1,10 @@
 # Stacks and detection
 
-A **stack** is a named language or ecosystem (`go`, `npm`, `python`, `shell`, etc.). Aegis uses the stack to decide which scanners are eligible for which files.
+A **stack** is a named language or ecosystem (`go`, `npm`, `python`, `shell`, etc.). Lintel uses the stack to decide which scanners are eligible for which files.
 
 ## How detection works
 
-With `stacks.auto: true`, Aegis scans the staged (or working-tree, in non-hook mode) file list and infers stacks based on manifests and extensions:
+With `stacks.auto: true`, Lintel scans the staged (or working-tree, in non-hook mode) file list and infers stacks based on manifests and extensions:
 
 | Stack    | Trigger                                                    |
 | -------- | ---------------------------------------------------------- |
@@ -33,7 +33,7 @@ stacks:
   include: [go, npm]
 ```
 
-When `auto: false` and a staged file does not belong to any listed stack, it is skipped silently. Aegis does not warn on unclassified files - this is intentional so that mixed repos don't spam output.
+When `auto: false` and a staged file does not belong to any listed stack, it is skipped silently. Lintel does not warn on unclassified files - this is intentional so that mixed repos don't spam output.
 
 ## Stacks and scanners
 
@@ -44,7 +44,7 @@ The [scanner pages](scanners/index.md) document each scanner's stack mapping.
 ## Debugging detection
 
 ```bash
-aegis run --verbose
+lintel run --verbose
 # …
 # stage=detect  staged=24  stacks=[go shell]  skipped=3
 ```

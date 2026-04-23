@@ -126,22 +126,22 @@ jobs:
           commit="$(git rev-parse --short HEAD)"
           date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           ldflags="-s -w \
-            -X github.com/MHChlagou/aegis/internal/version.Version=${version} \
-            -X github.com/MHChlagou/aegis/internal/version.Commit=${commit} \
-            -X github.com/MHChlagou/aegis/internal/version.Date=${date}"
+            -X github.com/MHChlagou/lintel/internal/version.Version=${version} \
+            -X github.com/MHChlagou/lintel/internal/version.Commit=${commit} \
+            -X github.com/MHChlagou/lintel/internal/version.Date=${date}"
           ext=""
           if [ "${GOOS}" = "windows" ]; then ext=".exe"; fi
-          out="dist/aegis-${GOOS}-${GOARCH}${ext}"
+          out="dist/lintel-${GOOS}-${GOARCH}${ext}"
           mkdir -p dist
-          go build -trimpath -ldflags "${ldflags}" -o "${out}" ./cmd/aegis
+          go build -trimpath -ldflags "${ldflags}" -o "${out}" ./cmd/lintel
           sha256sum "${out}" | tee "${out}.sha256"
 
       - name: Upload binary
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: aegis-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: lintel-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
-            dist/aegis-${{ matrix.goos }}-${{ matrix.goarch }}*
+            dist/lintel-${{ matrix.goos }}-${{ matrix.goarch }}*
 
   govulncheck:
     name: govulncheck
@@ -165,21 +165,21 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: aegis-linux-amd64
+          name: lintel-linux-amd64
           path: dist
       - name: Smoke test
         shell: bash
         run: |
           set -euo pipefail
-          chmod +x dist/aegis-linux-amd64
-          ./dist/aegis-linux-amd64 version
+          chmod +x dist/lintel-linux-amd64
+          ./dist/lintel-linux-amd64 version
           tmp=$(mktemp -d)
           (cd "${tmp}" && git init -q)
-          ./dist/aegis-linux-amd64 --repo "${tmp}" init
-          test -f "${tmp}/.aegis/aegis.yaml"
+          ./dist/lintel-linux-amd64 --repo "${tmp}" init
+          test -f "${tmp}/.lintel/lintel.yaml"
           sed -i -e '/^  secrets:/,/^  [a-z]/ s/    enabled: true/    enabled: false/' \
                  -e '/^  malicious_code:/,/^  [a-z]/ s/    enabled: true/    enabled: false/' \
                  -e '/^  dependencies:/,/^  [a-z]/ s/    enabled: true/    enabled: false/' \
-                 "${tmp}/.aegis/aegis.yaml"
-          ./dist/aegis-linux-amd64 --repo "${tmp}" run --output json | tee /tmp/out.json
+                 "${tmp}/.lintel/lintel.yaml"
+          ./dist/lintel-linux-amd64 --repo "${tmp}" run --output json | tee /tmp/out.json
           python3 -m json.tool < /tmp/out.json >/dev/null

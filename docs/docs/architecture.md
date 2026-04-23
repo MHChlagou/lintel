@@ -1,12 +1,12 @@
 # Architecture
 
-Aegis is a modestly-sized Go codebase (~4k lines, no generics tricks, no reflection-heavy framework). This page gives a map you can hold in your head.
+Lintel is a modestly-sized Go codebase (~4k lines, no generics tricks, no reflection-heavy framework). This page gives a map you can hold in your head.
 
 ## Module layout
 
 ```
-aegis/
-├── cmd/aegis/              # main package; thin wrapper around internal/cli
+lintel/
+├── cmd/lintel/              # main package; thin wrapper around internal/cli
 ├── internal/
 │   ├── cli/                # cobra commands (init, install, run, doctor, …)
 │   ├── config/             # YAML types, loader, defaults, validation
@@ -21,7 +21,7 @@ aegis/
 │   ├── report/             # pretty + JSON output renderers
 │   └── version/            # build-time version/commit/date ldflags
 ├── docs/                   # this MkDocs site
-├── examples/               # reference aegis.yaml configs
+├── examples/               # reference lintel.yaml configs
 ├── testdata/               # canned scanner outputs for adapter tests
 └── .github/                # workflows, templates, CODEOWNERS
 ```
@@ -73,14 +73,14 @@ The full checklist is in [Adding a scanner](adding-a-scanner.md).
 | Gate                  | Threshold boundary cases                                           |
 | Runner                | Synthetic checkers; verifies timeouts, parallelism, ordering       |
 | Hook                  | Install / uninstall with pre-existing foreign hooks                |
-| End-to-end            | `make smoke` - real `aegis` binary against a fixture repo          |
+| End-to-end            | `make smoke` - real `lintel` binary against a fixture repo          |
 
 The matrix is explicit - each package has at least one `_test.go` file with table-driven cases. There is no hidden test infrastructure.
 
 ## Design rules
 
 1. **One binary, no runtime.** CGO disabled; no `os/exec` to interpreters.
-2. **No hidden state.** Every config knob lives in `aegis.yaml`. Behaviors keyed off environment variables are listed in [env vars](reference/env-vars.md).
+2. **No hidden state.** Every config knob lives in `lintel.yaml`. Behaviors keyed off environment variables are listed in [env vars](reference/env-vars.md).
 3. **Deterministic output.** Same inputs → same bytes out.
 4. **Fail loud on supply-chain surprises.** Missing or mismatched hashes halt the run by default; the operator must take explicit action to override.
 5. **Small interfaces.** `Checker`, `Filter`, `Reporter` are each a few methods. Resist generic frameworks; prefer explicit wiring.

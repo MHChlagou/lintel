@@ -1,4 +1,4 @@
-# Aegis config for a TypeScript monorepo (pnpm or yarn workspaces).
+# Lintel config for a TypeScript monorepo (pnpm or yarn workspaces).
 # Biome handles both lint and format. Dependencies are checked on pre-push.
 
 schema: 1

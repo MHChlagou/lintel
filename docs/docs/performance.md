@@ -1,6 +1,6 @@
 # Concurrency and performance
 
-Aegis is designed to fit inside a developer's pre-commit wait budget - ideally under 2 seconds for a small staged change, under 10 for a large one. This page describes the knobs.
+Lintel is designed to fit inside a developer's pre-commit wait budget - ideally under 2 seconds for a small staged change, under 10 for a large one. This page describes the knobs.
 
 ## Target budgets
 
@@ -39,13 +39,13 @@ A timed-out scanner yields **exit 4** for that check but does not fail the other
 
 ## Staged-file scoping
 
-On a Git hook, Aegis passes only the staged file list to scanners that accept a file argument. For scanners that always scan the whole tree (for example, `osv-scanner` on `package-lock.json`), the file list is still computed so that the filter stage knows which findings originate in changed files.
+On a Git hook, Lintel passes only the staged file list to scanners that accept a file argument. For scanners that always scan the whole tree (for example, `osv-scanner` on `package-lock.json`), the file list is still computed so that the filter stage knows which findings originate in changed files.
 
 This is the single largest performance win over "just run gitleaks" approaches: a 20-file commit in a 200k-file repo still finishes in seconds.
 
 ## Measured cost
 
-`aegis run --verbose` prints per-scanner elapsed times. A typical breakdown on a Go service with a ~1k-line pre-commit change:
+`lintel run --verbose` prints per-scanner elapsed times. A typical breakdown on a Go service with a ~1k-line pre-commit change:
 
 ```
 gofmt            80ms
@@ -63,7 +63,7 @@ Total: ~1.3 s wall, since `golangci-lint` and `osv-scanner` overlap.
 - **Set `max_parallel: 2` on CI runners with shared CPU.** More parallelism is not always faster under contention.
 - **Inspect `--verbose` output** before hypothesizing. Most "slow" reports turn out to be one specific scanner on one specific file.
 
-## What Aegis does not do
+## What Lintel does not do
 
 - It does not cache scanner results between runs. A scanner re-reads the file on each invocation. Caching is a v2.0 roadmap item - until then, correctness wins over cleverness.
 - It does not do incremental analysis. A file is either in scope or not; there is no "diff of findings" calculation at the scanner level.

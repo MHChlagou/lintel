@@ -6,9 +6,9 @@
 
 ## What it does
 
-Biome is an all-in-one JavaScript / TypeScript toolchain that includes a linter and a formatter. Aegis uses it for both `lint` and `format` on `npm` stack files.
+Biome is an all-in-one JavaScript / TypeScript toolchain that includes a linter and a formatter. Lintel uses it for both `lint` and `format` on `npm` stack files.
 
-## How Aegis invokes it
+## How Lintel invokes it
 
 Lint:
 
@@ -26,7 +26,7 @@ Biome is fast enough that running both on pre-commit is a non-issue for most rep
 
 ## Severity mapping
 
-| Biome severity | Aegis severity |
+| Biome severity | Lintel severity |
 | -------------- | -------------- |
 | `error`        | `error`        |
 | `warning`      | `warn`         |
@@ -43,8 +43,8 @@ scanners:
       linux/amd64: "…"
 ```
 
-Biome reads its own `biome.json` config for rule enablement - Aegis does not intermediate the rules.
+Biome reads its own `biome.json` config for rule enablement - Lintel does not intermediate the rules.
 
 ## Monorepo notes
 
-In a workspace layout, Aegis invokes biome from the repo root so a single `biome.json` at the top-level applies everywhere. If your packages have their own configs, biome picks up the nearest one per file.
+In a workspace layout, Lintel invokes biome from the repo root so a single `biome.json` at the top-level applies everywhere. If your packages have their own configs, biome picks up the nearest one per file.

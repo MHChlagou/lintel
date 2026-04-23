@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Aegis are documented here.
+All notable changes to Lintel are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -16,12 +16,12 @@ produced "no sha256 for platform" errors.
 
 ### Added
 
-- `aegis install <scanner>` — downloads the pinned upstream release,
+- `lintel install <scanner>` — downloads the pinned upstream release,
   verifies its SHA256 on the wire, extracts the binary, re-verifies it
-  on disk, and places it at `~/.aegis/bin/<name>`.
-- `aegis install --all` — installs every scanner declared in the
-  loaded `aegis.yaml`. Skips `gofmt` (ships with the Go toolchain).
-- `aegis upgrade` — checks the GitHub Releases API for a newer aegis
+  on disk, and places it at `~/.lintel/bin/<name>`.
+- `lintel install --all` — installs every scanner declared in the
+  loaded `lintel.yaml`. Skips `gofmt` (ships with the Go toolchain).
+- `lintel upgrade` — checks the GitHub Releases API for a newer lintel
   version and prints the release notes plus a copy-paste upgrade
   command for your OS and architecture. The command never replaces
   the installed binary; self-updating verifiers are a larger trust
@@ -31,8 +31,8 @@ produced "no sha256 for platform" errors.
   release asset, verify its SHA256, and optionally verify the Sigstore
   bundle when `cosign` is on `$PATH`. Configurable via flags
   (`--version`, `--install-dir`, `--no-cosign`) and environment
-  variables (`AEGIS_VERSION`, `AEGIS_INSTALL_DIR`,
-  `AEGIS_VERIFY_COSIGN`). The Unix script falls back to
+  variables (`LINTEL_VERSION`, `LINTEL_INSTALL_DIR`,
+  `LINTEL_VERIFY_COSIGN`). The Unix script falls back to
   `$HOME/.local/bin` when `/usr/local/bin` is not writable and no
   `sudo` is available.
 - Embedded scanner pin database shipped inside the binary
@@ -42,7 +42,7 @@ produced "no sha256 for platform" errors.
   `archive_sha256` (verified at download time) and `binary_sha256`
   (verified on every scanner invocation, so extraction bugs or pin
   drift between the two are caught loudly).
-- Resolver pin fallback: when the user's `aegis.yaml` has no
+- Resolver pin fallback: when the user's `lintel.yaml` has no
   `sha256` for a scanner/platform, the resolver consults the embedded
   pin database instead of refusing outright. Any explicit user pin
   still wins — the fallback is strictly additive.
@@ -50,9 +50,9 @@ produced "no sha256 for platform" errors.
   plus the two vendor CDNs currently in use (`astral.sh`, `biomejs.dev`)
   are trusted; non-HTTPS and off-list hosts are refused before any
   bytes are read.
-- `aegis doctor` now prints a count-aware remediation hint after
-  failures: one scanner missing → `run: aegis install <name>`;
-  multiple → `run: aegis install --all`. `gofmt` is special-cased
+- `lintel doctor` now prints a count-aware remediation hint after
+  failures: one scanner missing → `run: lintel install <name>`;
+  multiple → `run: lintel install --all`. `gofmt` is special-cased
   with a "install the Go toolchain" note.
 - Release-engineering tool `scripts/refresh-pins.go` (build-ignored).
   Downloads every asset declared in `scanners.yaml`, computes both
@@ -101,10 +101,10 @@ First public release. Implements the v1.0 scope of the project specification.
 - SHA256 pin per platform for every scanner binary; verified on every run.
 - `strict_versions: true` by default - refuses to execute unverified binaries.
 - `protect_secrets: true` by default - the secrets check cannot be disabled
-  or bypassed (`AEGIS_SKIP=secrets`, inline ignores, and `--no-verify` all
+  or bypassed (`LINTEL_SKIP=secrets`, inline ignores, and `--no-verify` all
   still run it).
-- Override mechanism (`AEGIS_SKIP` + mandatory `AEGIS_REASON`) with an
-  append-only audit log at `.aegis/overrides.log`.
+- Override mechanism (`LINTEL_SKIP` + mandatory `LINTEL_REASON`) with an
+  append-only audit log at `.lintel/overrides.log`.
 - Release artifacts cross-compiled with `CGO_ENABLED=0` and signed with
   Sigstore keyless.
 
@@ -115,10 +115,10 @@ First public release. Implements the v1.0 scope of the project specification.
   `SECURITY.md`, `CHANGELOG.md`, `CODEOWNERS`.
 - Issue and pull-request templates; Dependabot config for Go modules,
   GitHub Actions, and pip.
-- Reference `aegis.yaml` configs under `examples/` for go-service,
+- Reference `lintel.yaml` configs under `examples/` for go-service,
   typescript-monorepo, and python-lib.
 - MkDocs-Material documentation site at
-  https://mhchlagou.github.io/aegis/, deployed via native GitHub Pages.
+  https://mhchlagou.github.io/lintel/, deployed via native GitHub Pages.
 
 #### CI / release workflows
 
@@ -138,9 +138,9 @@ per job.
 ### Requirements
 
 - Go **1.25+** for building from source.
-- External scanner binaries per your `aegis.yaml`. Aegis coordinates them
+- External scanner binaries per your `lintel.yaml`. Lintel coordinates them
   but does not bundle or download them - install and pin each one you use.
 
-[Unreleased]: https://github.com/MHChlagou/aegis/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/MHChlagou/aegis/releases/tag/v0.2.0
-[0.1.0]: https://github.com/MHChlagou/aegis/releases/tag/v0.1.0
+[Unreleased]: https://github.com/MHChlagou/lintel/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/MHChlagou/lintel/releases/tag/v0.2.0
+[0.1.0]: https://github.com/MHChlagou/lintel/releases/tag/v0.1.0

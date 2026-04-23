@@ -10,7 +10,7 @@ func TestRenderFixHint_SingleScanner(t *testing.T) {
 	var buf bytes.Buffer
 	renderFixHint(&buf, []string{"gitleaks"})
 	got := buf.String()
-	if !strings.Contains(got, "aegis install gitleaks") {
+	if !strings.Contains(got, "lintel install gitleaks") {
 		t.Errorf("expected single-scanner hint naming gitleaks, got: %q", got)
 	}
 	if strings.Contains(got, "--all") {
@@ -22,7 +22,7 @@ func TestRenderFixHint_MultipleScanners(t *testing.T) {
 	var buf bytes.Buffer
 	renderFixHint(&buf, []string{"gitleaks", "ruff", "biome"})
 	got := buf.String()
-	if !strings.Contains(got, "aegis install --all") {
+	if !strings.Contains(got, "lintel install --all") {
 		t.Errorf("expected --all hint for multiple failures, got: %q", got)
 	}
 	for _, n := range []string{"gitleaks", "ruff", "biome"} {
@@ -39,8 +39,8 @@ func TestRenderFixHint_GofmtIsSpecialCased(t *testing.T) {
 	if !strings.Contains(got, "Go toolchain") {
 		t.Errorf("expected Go-toolchain note for gofmt-only failure, got: %q", got)
 	}
-	if strings.Contains(got, "aegis install") {
-		t.Errorf("should not suggest `aegis install` for gofmt, got: %q", got)
+	if strings.Contains(got, "lintel install") {
+		t.Errorf("should not suggest `lintel install` for gofmt, got: %q", got)
 	}
 }
 
@@ -48,7 +48,7 @@ func TestRenderFixHint_GofmtPlusOneOther(t *testing.T) {
 	var buf bytes.Buffer
 	renderFixHint(&buf, []string{"gofmt", "gitleaks"})
 	got := buf.String()
-	if !strings.Contains(got, "aegis install gitleaks") {
+	if !strings.Contains(got, "lintel install gitleaks") {
 		t.Errorf("expected single-scanner hint for gitleaks (gofmt is excluded), got: %q", got)
 	}
 	if !strings.Contains(got, "Go toolchain") {

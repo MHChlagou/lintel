@@ -37,8 +37,8 @@ func TestUpgradeCommand_Linux(t *testing.T) {
 	got := upgradeCommand("v0.3.0", "linux", "amd64")
 	for _, want := range []string{
 		"curl -fsSL",
-		"releases/download/v0.3.0/aegis-linux-amd64",
-		"-o /usr/local/bin/aegis",
+		"releases/download/v0.3.0/lintel-linux-amd64",
+		"-o /usr/local/bin/lintel",
 		"chmod +x",
 	} {
 		if !strings.Contains(got, want) {
@@ -51,7 +51,7 @@ func TestUpgradeCommand_Windows(t *testing.T) {
 	got := upgradeCommand("v0.3.0", "windows", "amd64")
 	for _, want := range []string{
 		"Invoke-WebRequest",
-		"releases/download/v0.3.0/aegis-windows-amd64.exe",
+		"releases/download/v0.3.0/lintel-windows-amd64.exe",
 		"$env:USERPROFILE",
 	} {
 		if !strings.Contains(got, want) {
@@ -65,7 +65,7 @@ func TestRenderUpgradeNotice_NewerAvailable(t *testing.T) {
 		TagName:     "v0.3.0",
 		PublishedAt: "2026-05-14T12:00:00Z",
 		Body:        "### Added\n- new widget",
-		HTMLURL:     "https://github.com/MHChlagou/aegis/releases/tag/v0.3.0",
+		HTMLURL:     "https://github.com/MHChlagou/lintel/releases/tag/v0.3.0",
 	}
 	var buf bytes.Buffer
 	if err := renderUpgradeNotice(&buf, "v0.2.0", rel, "linux", "amd64"); err != nil {
@@ -78,7 +78,7 @@ func TestRenderUpgradeNotice_NewerAvailable(t *testing.T) {
 		"released 2026-05-14",
 		"new widget",
 		"curl -fsSL",
-		"aegis-linux-amd64",
+		"lintel-linux-amd64",
 		"Release page:",
 	} {
 		if !strings.Contains(out, want) {

@@ -19,7 +19,7 @@ type Options struct {
 	Scanner      string
 	Version      string
 	Platform     string // empty = runtime.GOOS + "_" + runtime.GOARCH
-	DestDir      string // empty = ~/.aegis/bin
+	DestDir      string // empty = ~/.lintel/bin
 	HTTP         *http.Client
 	Progress     io.Writer       // optional; receives "  → downloading …" style lines
 	AllowedHosts map[string]bool // optional override of the default allowlist (tests, private mirrors)
@@ -40,7 +40,7 @@ type Result struct {
 // the embedded pin DB, and places the binary at <DestDir>/<scanner>.
 //
 // Errors are deliberately descriptive — this is a user-facing path triggered
-// by `aegis install <tool>` or by `aegis doctor`'s suggested remediation.
+// by `lintel install <tool>` or by `lintel doctor`'s suggested remediation.
 func Install(reg *Registry, opt Options) (*Result, error) {
 	if opt.Scanner == "" || opt.Version == "" {
 		return nil, fmt.Errorf("installer: scanner and version are required")
@@ -53,7 +53,7 @@ func Install(reg *Registry, opt Options) (*Result, error) {
 		if err != nil {
 			return nil, fmt.Errorf("locate user home: %w", err)
 		}
-		opt.DestDir = filepath.Join(home, ".aegis", "bin")
+		opt.DestDir = filepath.Join(home, ".lintel", "bin")
 	}
 	if opt.HTTP == nil {
 		opt.HTTP = &http.Client{Timeout: 5 * time.Minute}
@@ -140,7 +140,7 @@ func downloadToTemp(client *http.Client, rawURL string, progress io.Writer) (str
 		return "", "", fmt.Errorf("http %s: %s", rawURL, resp.Status)
 	}
 
-	tmp, err := os.CreateTemp("", "aegis-install-*")
+	tmp, err := os.CreateTemp("", "lintel-install-*")
 	if err != nil {
 		return "", "", fmt.Errorf("create temp: %w", err)
 	}

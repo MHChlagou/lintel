@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/MHChlagou/aegis/internal/config"
+	"github.com/MHChlagou/lintel/internal/config"
 )
 
 // ResolvedBinary is the output of resolution: where the binary lives, what
@@ -31,7 +31,7 @@ type ResolvedBinary struct {
 
 // PinLookup is the narrow interface the resolver uses to fall back to a
 // shipped pin database (e.g. internal/installer.Registry) when the user's
-// aegis.yaml has no sha256 entry for a given scanner/platform. Returning
+// lintel.yaml has no sha256 entry for a given scanner/platform. Returning
 // "" means "no pinned hash available"; callers then apply their usual
 // strict/permissive handling.
 type PinLookup interface {
@@ -58,14 +58,14 @@ func New(repoRoot string, binaries map[string]config.Binary, strict bool) *Resol
 }
 
 // SetPinFallback installs a secondary source for expected hashes. It is
-// only consulted when the user's aegis.yaml leaves a (scanner, platform)
+// only consulted when the user's lintel.yaml leaves a (scanner, platform)
 // hash empty — any explicit user pin takes precedence.
 func (r *Resolver) SetPinFallback(p PinLookup) {
 	r.pins = p
 }
 
 // Resolve locates and verifies the named binary. Results are memoized for the
-// life of the Resolver (one process == one aegis run).
+// life of the Resolver (one process == one lintel run).
 func (r *Resolver) Resolve(name string) (*ResolvedBinary, error) {
 	r.mu.Lock()
 	if rb, ok := r.cache[name]; ok {
@@ -128,17 +128,17 @@ func (r *Resolver) locate(name string, spec config.Binary) (string, error) {
 			return p, nil
 		}
 	}
-	// 2. $AEGIS_BIN_DIR.
-	if dir := os.Getenv("AEGIS_BIN_DIR"); dir != "" {
+	// 2. $LINTEL_BIN_DIR.
+	if dir := os.Getenv("LINTEL_BIN_DIR"); dir != "" {
 		p := filepath.Join(expandHome(dir), name)
 		tried = append(tried, p)
 		if st, err := os.Stat(p); err == nil && !st.IsDir() {
 			return p, nil
 		}
 	}
-	// 3. ~/.aegis/bin/<name>.
+	// 3. ~/.lintel/bin/<name>.
 	if home, err := os.UserHomeDir(); err == nil {
-		p := filepath.Join(home, ".aegis", "bin", name)
+		p := filepath.Join(home, ".lintel", "bin", name)
 		tried = append(tried, p)
 		if st, err := os.Stat(p); err == nil && !st.IsDir() {
 			return p, nil
@@ -154,7 +154,7 @@ func (r *Resolver) locate(name string, spec config.Binary) (string, error) {
 	if hint == "" {
 		hint = "(no install_hint in spec)"
 	}
-	return "", fmt.Errorf("required binary not found: %s (v%s)\n  searched: %s\n  install:  %s\n  hint:     drop the binary on $PATH or at ~/.aegis/bin/%s, then run `aegis doctor`",
+	return "", fmt.Errorf("required binary not found: %s (v%s)\n  searched: %s\n  install:  %s\n  hint:     drop the binary on $PATH or at ~/.lintel/bin/%s, then run `lintel doctor`",
 		name, ifEmpty(spec.Version, "?"), strings.Join(tried, ", "), hint, name)
 }
 

@@ -1,6 +1,6 @@
 # Installation
 
-Aegis ships as a single static binary. There is no runtime to install, no Node / Python / Ruby dependency, and no daemon - just the `aegis` executable and the scanner binaries you want it to coordinate.
+Lintel ships as a single static binary. There is no runtime to install, no Node / Python / Ruby dependency, and no daemon - just the `lintel` executable and the scanner binaries you want it to coordinate.
 
 ## Supported platforms
 
@@ -20,30 +20,30 @@ behind your back.
 === "macOS / Linux"
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/MHChlagou/aegis/main/scripts/install.sh | sh
+    curl -fsSL https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.sh | sh
     ```
 
     Flags and env vars the script accepts:
 
     | Flag              | Env var                 | Default                              |
     | ----------------- | ----------------------- | ------------------------------------ |
-    | `--version <tag>` | `AEGIS_VERSION`         | `latest`                             |
-    | `--install-dir`   | `AEGIS_INSTALL_DIR`     | `/usr/local/bin` (→ `$HOME/.local/bin` when not writable and no sudo) |
-    | `--no-cosign`     | `AEGIS_VERIFY_COSIGN=false` | auto (verify when cosign is on PATH) |
+    | `--version <tag>` | `LINTEL_VERSION`         | `latest`                             |
+    | `--install-dir`   | `LINTEL_INSTALL_DIR`     | `/usr/local/bin` (→ `$HOME/.local/bin` when not writable and no sudo) |
+    | `--no-cosign`     | `LINTEL_VERIFY_COSIGN=false` | auto (verify when cosign is on PATH) |
 
     ```bash
     # Pin a specific version
-    curl -fsSL https://raw.githubusercontent.com/MHChlagou/aegis/main/scripts/install.sh | sh -s -- --version v0.2.0
+    curl -fsSL https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.sh | sh -s -- --version v0.2.0
 
     # Install into a user-local path without sudo
-    AEGIS_INSTALL_DIR="$HOME/.local/bin" \
-      curl -fsSL https://raw.githubusercontent.com/MHChlagou/aegis/main/scripts/install.sh | sh
+    LINTEL_INSTALL_DIR="$HOME/.local/bin" \
+      curl -fsSL https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.sh | sh
     ```
 
 === "Windows (PowerShell)"
 
     ```powershell
-    iwr https://raw.githubusercontent.com/MHChlagou/aegis/main/scripts/install.ps1 -UseBasicParsing | iex
+    iwr https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.ps1 -UseBasicParsing | iex
     ```
 
     Parameters (pass by downloading and running the script, or via env
@@ -51,14 +51,14 @@ behind your back.
 
     | Parameter         | Env var             | Default                      |
     | ----------------- | ------------------- | ---------------------------- |
-    | `-Version`        | `AEGIS_VERSION`     | `latest`                     |
-    | `-InstallDir`     | `AEGIS_INSTALL_DIR` | `$env:USERPROFILE\bin`       |
+    | `-Version`        | `LINTEL_VERSION`     | `latest`                     |
+    | `-InstallDir`     | `LINTEL_INSTALL_DIR` | `$env:USERPROFILE\bin`       |
     | `-NoCosign`       | —                   | auto                         |
 
     ```powershell
     # Pin a specific version
-    $env:AEGIS_VERSION = 'v0.2.0'
-    iwr https://raw.githubusercontent.com/MHChlagou/aegis/main/scripts/install.ps1 -UseBasicParsing | iex
+    $env:LINTEL_VERSION = 'v0.2.0'
+    iwr https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.ps1 -UseBasicParsing | iex
     ```
 
 ## Install from a release manually
@@ -66,17 +66,17 @@ behind your back.
 If you prefer to run the steps yourself or your environment blocks the
 `curl | sh` pattern:
 
-1. Download the binary for your platform from the [releases page](https://github.com/MHChlagou/aegis/releases/latest).
+1. Download the binary for your platform from the [releases page](https://github.com/MHChlagou/lintel/releases/latest).
 2. Verify the SHA256 checksum (a `.sha256` file sits next to every binary).
 3. Optionally verify the Sigstore signature - see [supply-chain](supply-chain.md).
 4. Move the binary onto your `$PATH` (commonly `/usr/local/bin` on Unix).
-5. Run `aegis version` to confirm.
+5. Run `lintel version` to confirm.
 
 ```bash
-sha256sum -c aegis-linux-amd64.sha256
-chmod +x aegis-linux-amd64
-sudo mv aegis-linux-amd64 /usr/local/bin/aegis
-aegis version
+sha256sum -c lintel-linux-amd64.sha256
+chmod +x lintel-linux-amd64
+sudo mv lintel-linux-amd64 /usr/local/bin/lintel
+lintel version
 ```
 
 ## Install via Go
@@ -84,7 +84,7 @@ aegis version
 Useful for development or for systems where you prefer to track `main`.
 
 ```bash
-go install github.com/MHChlagou/aegis/cmd/aegis@latest
+go install github.com/MHChlagou/lintel/cmd/lintel@latest
 ```
 
 The binary lands in `$(go env GOBIN)` or `$(go env GOPATH)/bin`.
@@ -94,7 +94,7 @@ The binary lands in `$(go env GOBIN)` or `$(go env GOPATH)/bin`.
 ### Check for a newer release
 
 ```bash
-aegis upgrade
+lintel upgrade
 ```
 
 This queries the GitHub Releases API, compares against your running
@@ -110,33 +110,33 @@ after verifying the new SHA256 (and cosign signature, if available).
 === "macOS / Linux"
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/MHChlagou/aegis/main/scripts/install.sh | sh
+    curl -fsSL https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.sh | sh
     # Or pin: ... | sh -s -- --version v0.2.0
     ```
 
 === "Go toolchain"
 
     ```bash
-    go install github.com/MHChlagou/aegis/cmd/aegis@latest
-    # Or pin: go install github.com/MHChlagou/aegis/cmd/aegis@v0.2.0
+    go install github.com/MHChlagou/lintel/cmd/lintel@latest
+    # Or pin: go install github.com/MHChlagou/lintel/cmd/lintel@v0.2.0
     ```
 
 === "Windows (PowerShell)"
 
     ```powershell
-    # Close any running aegis.exe first — Windows locks running binaries.
-    iwr https://raw.githubusercontent.com/MHChlagou/aegis/main/scripts/install.ps1 -UseBasicParsing | iex
+    # Close any running lintel.exe first — Windows locks running binaries.
+    iwr https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.ps1 -UseBasicParsing | iex
     ```
 
 ### What does not need to change on upgrade
 
-- **Git hooks** (`.git/hooks/pre-commit`, `pre-push`) dispatch to the `aegis`
+- **Git hooks** (`.git/hooks/pre-commit`, `pre-push`) dispatch to the `lintel`
   binary via `$PATH`; they keep working after the binary is replaced.
-- **`~/.aegis/bin/<scanner>`** files are independent of the aegis version.
-- **`.aegis/aegis.yaml`** is stable across v0.x — new fields are opt-in.
+- **`~/.lintel/bin/<scanner>`** files are independent of the lintel version.
+- **`.lintel/lintel.yaml`** is stable across v0.x — new fields are opt-in.
 
-Run `aegis doctor` after upgrading to confirm every scanner still resolves.
-If your `aegis.yaml` has no `sha256` entries and you rely on the embedded
+Run `lintel doctor` after upgrading to confirm every scanner still resolves.
+If your `lintel.yaml` has no `sha256` entries and you rely on the embedded
 pin-database fallback, the new version may ship different pins — `doctor`
 will tell you immediately.
 
@@ -147,21 +147,21 @@ worth checking if you did not install via `go install`:
 
 ```bash
 ver=v0.2.0
-base="https://github.com/MHChlagou/aegis/releases/download/${ver}"
-curl -fsSL "${base}/aegis-linux-amd64.sha256"   -o aegis.sha256
-curl -fsSL "${base}/aegis-linux-amd64.sigstore" -o aegis.sigstore
+base="https://github.com/MHChlagou/lintel/releases/download/${ver}"
+curl -fsSL "${base}/lintel-linux-amd64.sha256"   -o lintel.sha256
+curl -fsSL "${base}/lintel-linux-amd64.sigstore" -o lintel.sigstore
 
-sha256sum -c <(printf '%s  aegis\n' "$(cat aegis.sha256)")
+sha256sum -c <(printf '%s  lintel\n' "$(cat lintel.sha256)")
 
-cosign verify-blob --bundle aegis.sigstore \
-  --certificate-identity-regexp='^https://github.com/MHChlagou/aegis/' \
+cosign verify-blob --bundle lintel.sigstore \
+  --certificate-identity-regexp='^https://github.com/MHChlagou/lintel/' \
   --certificate-oidc-issuer='https://token.actions.githubusercontent.com' \
-  aegis
+  lintel
 ```
 
 ## Install the scanners
 
-Aegis coordinates scanners - it does not bundle them. Install only the ones you actually use; `aegis doctor` will tell you which are missing once you configure them.
+Lintel coordinates scanners - it does not bundle them. Install only the ones you actually use; `lintel doctor` will tell you which are missing once you configure them.
 
 | Scanner          | Purpose              | Install                                                                                  |
 | ---------------- | -------------------- | ---------------------------------------------------------------------------------------- |
@@ -175,18 +175,18 @@ Aegis coordinates scanners - it does not bundle them. Install only the ones you 
 
 `gofmt` ships with the Go toolchain.
 
-After installing, run `aegis doctor` to confirm each configured scanner is found **and** its published SHA256 matches the pin in your `aegis.yaml`. If either check fails, `aegis run` refuses to execute that scanner.
+After installing, run `lintel doctor` to confirm each configured scanner is found **and** its published SHA256 matches the pin in your `lintel.yaml`. If either check fails, `lintel run` refuses to execute that scanner.
 
 ## Verify your installation
 
 ```bash
-aegis version
-# aegis 0.1.0  schema=1  commit=abc123  built=2026-04-22T10:15:00Z
+lintel version
+# lintel 0.1.0  schema=1  commit=abc123  built=2026-04-22T10:15:00Z
 
-aegis doctor
+lintel doctor
 # ✓ gitleaks 8.18.2 found at /usr/local/bin/gitleaks
 # ✓ hash matches pinned value
 # …
 ```
 
-If `aegis doctor` is happy, you are ready to [run your first scan](getting-started.md).
+If `lintel doctor` is happy, you are ready to [run your first scan](getting-started.md).

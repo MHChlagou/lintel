@@ -12,15 +12,15 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/MHChlagou/aegis/internal/version"
+	"github.com/MHChlagou/lintel/internal/version"
 )
 
 // The notifier hits the public GitHub Releases API (no auth, 60 req/h per IP).
 // It never modifies the installed binary — by design. Self-replacement in a
 // security-verifier tool creates a trust-surface larger than the UX win.
 const (
-	latestReleaseURL = "https://api.github.com/repos/MHChlagou/aegis/releases/latest"
-	releaseAssetBase = "https://github.com/MHChlagou/aegis/releases/download"
+	latestReleaseURL = "https://api.github.com/repos/MHChlagou/lintel/releases/latest"
+	releaseAssetBase = "https://github.com/MHChlagou/lintel/releases/download"
 )
 
 // ghRelease mirrors the subset of the GitHub Releases API we care about.
@@ -34,8 +34,8 @@ type ghRelease struct {
 func cmdUpgrade() *cobra.Command {
 	return &cobra.Command{
 		Use:   "upgrade",
-		Short: "Check for a newer aegis release and print the upgrade command",
-		Long: `Compares the running aegis version against the latest GitHub release.
+		Short: "Check for a newer lintel release and print the upgrade command",
+		Long: `Compares the running lintel version against the latest GitHub release.
 If a newer version exists, prints the release notes and a copy-paste
 upgrade command for your OS and architecture. This command never
 replaces the binary itself — self-updating verifiers are a larger
@@ -160,16 +160,16 @@ func parseSemver(s string) ([3]int, string) {
 // given platform. Linux/macOS get a curl one-liner; Windows gets a
 // PowerShell Invoke-WebRequest. The asset naming mirrors release.yml.
 func upgradeCommand(tag, goos, goarch string) string {
-	asset := fmt.Sprintf("aegis-%s-%s", goos, goarch)
+	asset := fmt.Sprintf("lintel-%s-%s", goos, goarch)
 	if goos == "windows" {
 		asset += ".exe"
 		return fmt.Sprintf(`  # PowerShell
   Invoke-WebRequest \
     -Uri %s/%s/%s \
-    -OutFile $env:USERPROFILE\bin\aegis.exe`, releaseAssetBase, tag, asset)
+    -OutFile $env:USERPROFILE\bin\lintel.exe`, releaseAssetBase, tag, asset)
 	}
-	return fmt.Sprintf(`  curl -fsSL %s/%s/%s -o /usr/local/bin/aegis
-  chmod +x /usr/local/bin/aegis`, releaseAssetBase, tag, asset)
+	return fmt.Sprintf(`  curl -fsSL %s/%s/%s -o /usr/local/bin/lintel
+  chmod +x /usr/local/bin/lintel`, releaseAssetBase, tag, asset)
 }
 
 func indentBlock(s, prefix string) string {

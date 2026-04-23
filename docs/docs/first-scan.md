@@ -1,21 +1,21 @@
 # Your first scan
 
-Once you have `aegis` on `$PATH` and at least one scanner installed, running a scan is one command. This page walks through the output in detail.
+Once you have `lintel` on `$PATH` and at least one scanner installed, running a scan is one command. This page walks through the output in detail.
 
 ## Scenario
 
-A small Go service with `gofmt` and `golangci-lint` installed. No hooks installed yet - we will invoke Aegis directly.
+A small Go service with `gofmt` and `golangci-lint` installed. No hooks installed yet - we will invoke Lintel directly.
 
 ```bash
 cd my-service
-aegis init
-aegis run
+lintel init
+lintel run
 ```
 
 ## Anatomy of a pretty report
 
 ```text
-Aegis v0.1.0  schema=1
+Lintel v0.1.0  schema=1
 
 Scope: 12 staged files (2 stacks: go, shell)
 
@@ -45,17 +45,17 @@ warn   gofmt          -                    internal/server/auth.go
 exit 1
 ```
 
-- The **scope** line reports how many files were handed to Aegis and which stacks they belong to.
+- The **scope** line reports how many files were handed to Lintel and which stacks they belong to.
 - Each scanner is listed with a finding count, a severity breakdown, and its own elapsed time. Slow scanners stand out.
 - **Findings** are grouped by severity (`error` > `warn` > `info`), then by scanner, then by file, deterministically.
-- The **gate** line is the decision: in the default config, any single `error` finding fails the commit. Configure this in `aegis.yaml` under `gate`.
+- The **gate** line is the decision: in the default config, any single `error` finding fails the commit. Configure this in `lintel.yaml` under `gate`.
 
 ## JSON output
 
 Use `--output json` for CI or machine consumption. The shape is stable and documented in the [specification](reference/spec.md#112-json).
 
 ```bash
-aegis run --output json | jq '.findings[0]'
+lintel run --output json | jq '.findings[0]'
 ```
 
 ```json
@@ -91,4 +91,4 @@ Full breakdown: [exit codes reference](reference/exit-codes.md).
 
 - [Wire scanners into Git hooks](commands/install.md) so every commit is scanned.
 - [Add a baseline](baseline-allowlist.md) if your repo already has findings you want to accept now and fix later.
-- [Run Aegis in CI](ci-integration.md).
+- [Run Lintel in CI](ci-integration.md).

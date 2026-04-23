@@ -1,16 +1,16 @@
-# `aegis ignore`
+# `lintel ignore`
 
-Add a rule to `.aegis/allowlist.yaml`. See [baseline + allowlist](../baseline-allowlist.md#allowlist) for when to prefer this over a baseline or an inline ignore.
+Add a rule to `.lintel/allowlist.yaml`. See [baseline + allowlist](../baseline-allowlist.md#allowlist) for when to prefer this over a baseline or an inline ignore.
 
 ## Usage
 
 ```bash
-aegis ignore add [flags]
-aegis ignore list
-aegis ignore remove --id <entry-id>
+lintel ignore add [flags]
+lintel ignore list
+lintel ignore remove --id <entry-id>
 ```
 
-## `aegis ignore add`
+## `lintel ignore add`
 
 | Flag           | Required | Purpose                                                            |
 | -------------- | -------- | ------------------------------------------------------------------ |
@@ -20,7 +20,7 @@ aegis ignore remove --id <entry-id>
 | `--reason`     | yes      | Audit reason, min 8 chars                                          |
 
 ```bash
-aegis ignore add \
+lintel ignore add \
   --scanner gitleaks \
   --rule generic-api-key \
   --files 'testdata/**' \
@@ -29,9 +29,9 @@ aegis ignore add \
 
 Adding without `--reason` is refused with exit 2.
 
-## `aegis ignore list`
+## `lintel ignore list`
 
-Prints every entry in `.aegis/allowlist.yaml` with a computed stable `id`:
+Prints every entry in `.lintel/allowlist.yaml` with a computed stable `id`:
 
 ```text
 id         scanner         rule              files             reason
@@ -39,10 +39,10 @@ a1b2c3d4   gitleaks        generic-api-key   testdata/**       Test fixtures con
 f9e8d7c6   golangci-lint   errcheck          internal/legacy/**  Legacy module scheduled for rewrite in Q3
 ```
 
-## `aegis ignore remove`
+## `lintel ignore remove`
 
 ```bash
-aegis ignore remove --id a1b2c3d4
+lintel ignore remove --id a1b2c3d4
 ```
 
 Removes the entry with the given id. IDs are stable across runs; they are a short hash of `(scanner, rule, files)`, not a line number.

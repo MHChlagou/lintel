@@ -6,24 +6,24 @@
 
 ## What it does
 
-`golangci-lint` is a wrapper around many Go linters (staticcheck, govet, errcheck, revive, …) with shared config and caching. Aegis uses it for the `lint` check on Go files.
+`golangci-lint` is a wrapper around many Go linters (staticcheck, govet, errcheck, revive, …) with shared config and caching. Lintel uses it for the `lint` check on Go files.
 
-## How Aegis invokes it
+## How Lintel invokes it
 
 ```text
 golangci-lint run \
   --out-format=json \
-  --no-config=${AEGIS_GOLANGCI_NO_CONFIG:-false} \
+  --no-config=${LINTEL_GOLANGCI_NO_CONFIG:-false} \
   --timeout=<per_check> \
   <package paths from staged files>
 ```
 
-- Aegis translates staged file paths to Go package paths (`./internal/foo/...`), since `golangci-lint` is package-oriented.
+- Lintel translates staged file paths to Go package paths (`./internal/foo/...`), since `golangci-lint` is package-oriented.
 - `--no-config` is off by default so your existing `.golangci.yml` is honored.
 
 ## Severity mapping
 
-| golangci-lint severity | Aegis severity |
+| golangci-lint severity | Lintel severity |
 | ---------------------- | -------------- |
 | `error`                | `error`        |
 | `warning`              | `warn`         |
@@ -33,7 +33,7 @@ Linters that don't emit an explicit severity are treated as `warn`.
 
 ## Configuration
 
-Aegis pins the binary; rule selection is in your repo's `.golangci.yml` (or `golangci.yaml`, `.golangci.toml`).
+Lintel pins the binary; rule selection is in your repo's `.golangci.yml` (or `golangci.yaml`, `.golangci.toml`).
 
 ```yaml
 scanners:

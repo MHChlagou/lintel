@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MHChlagou/aegis/internal/cli"
+	"github.com/MHChlagou/lintel/internal/cli"
 )
 
 func main() {

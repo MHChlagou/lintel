@@ -1,4 +1,4 @@
-# Aegis - Technical Specification
+# Lintel - Technical Specification
 
 **Version:** 0.1 (draft)
 **Status:** design / pre-implementation
@@ -8,15 +8,15 @@
 
 ## 0. Name and Tagline
 
-**Aegis** - *the shield your commits pass through.*
+**Lintel** - *the shield your commits pass through.*
 
-The name comes from Greek mythology (Athena's/Zeus's protective shield). It is short (5 letters), easy to type as a CLI (`aegis run`), and evokes "defensive layer in front of something valuable." If the name needs to change later, the binary name, config directory (`.aegis/`), and config filename (`aegis.yaml`) are the only identifiers that need updating.
+The name comes from Greek mythology (Athena's/Zeus's protective shield). It is short (5 letters), easy to type as a CLI (`lintel run`), and evokes "defensive layer in front of something valuable." If the name needs to change later, the binary name, config directory (`.lintel/`), and config filename (`lintel.yaml`) are the only identifiers that need updating.
 
 ---
 
 ## 1. Overview
 
-Aegis is a shift-left security orchestrator that runs as a Git hook (and optionally in CI). It does **not** implement scanners itself. Instead, it coordinates best-in-class open-source scanners installed locally by the user, reads a single declarative spec file from the repository, and blocks or warns on the commit based on findings.
+Lintel is a shift-left security orchestrator that runs as a Git hook (and optionally in CI). It does **not** implement scanners itself. Instead, it coordinates best-in-class open-source scanners installed locally by the user, reads a single declarative spec file from the repository, and blocks or warns on the commit based on findings.
 
 **Tagline:** *A single Go binary. Zero runtime dependencies. Orchestrates the scanners you trust.*
 
@@ -24,18 +24,18 @@ Aegis is a shift-left security orchestrator that runs as a Git hook (and optiona
 
 Developer teams want shift-left security (secrets, SAST, SCA, lint, format) on every commit, but the existing landscape forces them to either (a) glue together Husky + lint-staged + N individual tools with bespoke config per tool, or (b) adopt a proprietary SaaS platform. Option (a) is brittle and hard to keep consistent across repos; option (b) is expensive and usually ships as a "black box."
 
-### 1.2 What Aegis Is
+### 1.2 What Lintel Is
 
 - A **single static binary** (Go, cross-compiled for linux/darwin/windows on amd64/arm64).
 - A **declarative spec**: one YAML file describes the stack, scanners, gates, and ignores.
 - A **git hook manager** with a tight UX (install/uninstall/run/doctor).
 - A **reporter**: normalizes JSON/SARIF output from heterogeneous scanners into a single view.
 
-### 1.3 What Aegis Is Not
+### 1.3 What Lintel Is Not
 
-- Not a scanner. Aegis never implements regexes, rule engines, or vuln databases of its own.
-- Not a package manager. Aegis does not install scanner binaries by default (v1); users bring their own.
-- Not a CI server. Aegis runs in CI by being invoked from one, not by replacing one.
+- Not a scanner. Lintel never implements regexes, rule engines, or vuln databases of its own.
+- Not a package manager. Lintel does not install scanner binaries by default (v1); users bring their own.
+- Not a CI server. Lintel runs in CI by being invoked from one, not by replacing one.
 - Not a secret vault, SBOM platform, or compliance dashboard.
 
 ---
@@ -48,7 +48,7 @@ Developer teams want shift-left security (secrets, SAST, SCA, lint, format) on e
 2. **Zero scanner lock-in.** Any supported scanner can be swapped via config.
 3. **Reproducible.** Same spec + same scanner versions = same result on every machine.
 4. **Fast.** p95 pre-commit wall time under 5 seconds on a repo of 10k staged LOC.
-5. **Safe by default.** All blocking gates enabled on `aegis init`; overrides require an auditable reason.
+5. **Safe by default.** All blocking gates enabled on `lintel init`; overrides require an auditable reason.
 6. **Supply-chain hardened.** Every external binary is sha256-verified before execution.
 
 ### 2.2 Non-Goals
@@ -64,7 +64,7 @@ Developer teams want shift-left security (secrets, SAST, SCA, lint, format) on e
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                          aegis (single binary)                   │
+│                          lintel (single binary)                   │
 │                                                                  │
 │  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────────┐   │
 │  │  CLI     │──▶│  Config  │──▶│ Detector │──▶│   Resolver   │   │
@@ -91,8 +91,8 @@ Developer teams want shift-left security (secrets, SAST, SCA, lint, format) on e
 
 ### 3.1 Core Principles
 
-- **Orchestrator-only.** Aegis never contains a rule, a regex, or a CVE list.
-- **Declarative.** Every behavior change happens in `aegis.yaml`, never in code flags at call sites.
+- **Orchestrator-only.** Lintel never contains a rule, a regex, or a CVE list.
+- **Declarative.** Every behavior change happens in `lintel.yaml`, never in code flags at call sites.
 - **Fail closed.** If a required scanner is missing, the commit is blocked with a clear install hint - never silently skipped.
 - **Everything is JSON internally.** Pretty output is one of several formatters; machine formats are first-class.
 
@@ -100,29 +100,29 @@ Developer teams want shift-left security (secrets, SAST, SCA, lint, format) on e
 
 ## 4. Repository Layout
 
-When a user runs `aegis init` in a repo, Aegis creates:
+When a user runs `lintel init` in a repo, Lintel creates:
 
 ```
 <repo>/
-├── .aegis/
-│   ├── aegis.yaml          # main spec (committed)
+├── .lintel/
+│   ├── lintel.yaml          # main spec (committed)
 │   ├── rules/              # custom scanner rules (committed, optional)
 │   │   ├── gitleaks.toml
 │   │   └── opengrep/
 │   ├── allowlist.yaml      # path globs & reasons (committed)
 │   ├── baseline.json       # snapshot of existing findings to ignore (committed)
 │   └── overrides.log       # audit log of bypasses (gitignored)
-└── .git/hooks/             # installed by `aegis install`
+└── .git/hooks/             # installed by `lintel install`
     ├── pre-commit
     ├── commit-msg
     └── pre-push
 ```
 
-**Hard rule:** `.aegis/` contains **only** text config. Never binaries, never vendored scanners. If a user vendors a binary there, `aegis doctor` prints a warning.
+**Hard rule:** `.lintel/` contains **only** text config. Never binaries, never vendored scanners. If a user vendors a binary there, `lintel doctor` prints a warning.
 
 ---
 
-## 5. The Spec File (`aegis.yaml`) - Full Schema
+## 5. The Spec File (`lintel.yaml`) - Full Schema
 
 All keys are optional unless marked **required**. Unknown keys produce a warning, not an error, so forward-compatibility is maintained.
 
@@ -142,13 +142,13 @@ project:
     - pom.xml
 
 # -----------------------------------------------------------
-# Scanner binaries - user-installed, Aegis verifies & executes
+# Scanner binaries - user-installed, Lintel verifies & executes
 # -----------------------------------------------------------
 binaries:
   gitleaks:
-    command: gitleaks                  # resolved via path | $PATH | ~/.aegis/bin/
-    path: ~/.aegis/bin/gitleaks        # optional absolute override
-    version: "8.28.0"                  # required; displayed in `aegis doctor`
+    command: gitleaks                  # resolved via path | $PATH | ~/.lintel/bin/
+    path: ~/.lintel/bin/gitleaks        # optional absolute override
+    version: "8.28.0"                  # required; displayed in `lintel doctor`
     sha256:
       linux_amd64:   "abc123..."
       linux_arm64:   "..."
@@ -198,14 +198,14 @@ checks:
     scan:
       staged_only: true                # scan only staged files in pre-commit
       full_on_push: true               # scan history on pre-push
-    rules: .aegis/rules/gitleaks.toml  # optional custom rules
+    rules: .lintel/rules/gitleaks.toml  # optional custom rules
     warn_paths:
       - "**/*_test.{go,js,ts,py,rb}"
       - "**/test/**"
       - "**/__tests__/**"
       - "**/*.spec.{js,ts}"
       - "**/fixtures/**"
-    inline_ignore: "aegis:ignore-secret"
+    inline_ignore: "lintel:ignore-secret"
     entropy_threshold: 4.3             # gitleaks-specific; optional
 
   # 2) Malicious / insecure code patterns (SAST)
@@ -218,7 +218,7 @@ checks:
       - p/owasp-top-ten
       - p/command-injection
       - p/secrets                      # additional coverage
-      - .aegis/rules/opengrep/         # local custom rules dir
+      - .lintel/rules/opengrep/         # local custom rules dir
     severity_threshold: ERROR          # ERROR blocks; WARNING/INFO report only
     timeout_seconds: 60
     exclude_paths:
@@ -236,7 +236,7 @@ checks:
     offline:
       enabled: true                    # cache the vuln DB locally
       refresh_hours: 24
-      db_path: ~/.aegis/cache/osv
+      db_path: ~/.lintel/cache/osv
     ignore_cves:                       # explicit risk-accepted CVEs
       - id: CVE-2023-12345
         reason: "Not reachable in our call graph; tracked in JIRA-482"
@@ -281,7 +281,7 @@ checks:
       shell:       shfmt
 
 # -----------------------------------------------------------
-# Scope - what files Aegis looks at
+# Scope - what files Lintel looks at
 # -----------------------------------------------------------
 scope:
   staged_only: true                    # default for pre-commit
@@ -322,11 +322,11 @@ output:
 # Override / bypass
 # -----------------------------------------------------------
 override:
-  env_var: AEGIS_SKIP                  # e.g. AEGIS_SKIP=secrets,lint
-  allow_no_verify: false               # if false, Aegis refuses when --no-verify
+  env_var: LINTEL_SKIP                  # e.g. LINTEL_SKIP=secrets,lint
+  allow_no_verify: false               # if false, Lintel refuses when --no-verify
                                        # is detected (via a pre-commit guard)
   require_reason: true                 # prompt for reason, log to overrides.log
-  log_file: .aegis/overrides.log
+  log_file: .lintel/overrides.log
 
 # -----------------------------------------------------------
 # Performance
@@ -337,7 +337,7 @@ performance:
   total_timeout_seconds: 300
   cache:
     enabled: true
-    path: ~/.aegis/cache
+    path: ~/.lintel/cache
     ttl_hours: 24
 ```
 
@@ -347,7 +347,7 @@ performance:
 - Durations are integers in seconds (no ISO-8601).
 - Paths accept `~` (home expansion) and are always relative to the repo root unless absolute.
 - Globs use `doublestar` semantics (`**` recursive).
-- `enabled: false` on any block short-circuits that subtree; Aegis skips it entirely.
+- `enabled: false` on any block short-circuits that subtree; Lintel skips it entirely.
 
 ---
 
@@ -355,40 +355,40 @@ performance:
 
 ### 6.1 Resolution Order
 
-For a binary named `X`, Aegis looks in this order:
+For a binary named `X`, Lintel looks in this order:
 
 1. `binaries.X.path` if set (absolute or `~`-expanded)
-2. `$AEGIS_BIN_DIR/X` if `AEGIS_BIN_DIR` is set
-3. `~/.aegis/bin/X` (documented convention)
+2. `$LINTEL_BIN_DIR/X` if `LINTEL_BIN_DIR` is set
+3. `~/.lintel/bin/X` (documented convention)
 4. `$PATH` lookup via `exec.LookPath(binaries.X.command)`
 
-If none match, Aegis errors with:
+If none match, Lintel errors with:
 
 ```
 ✖ required binary not found: gitleaks (v8.28.0)
-  searched: /home/alice/.aegis/bin/gitleaks, $PATH
+  searched: /home/alice/.lintel/bin/gitleaks, $PATH
   install:  https://github.com/gitleaks/gitleaks/releases/tag/v8.28.0
-  hint:     drop the binary on $PATH or at ~/.aegis/bin/gitleaks, then run `aegis doctor`
+  hint:     drop the binary on $PATH or at ~/.lintel/bin/gitleaks, then run `lintel doctor`
 ```
 
 ### 6.2 Verification
 
-Before each execution of an external binary, Aegis:
+Before each execution of an external binary, Lintel:
 
 1. Reads the file into a streaming sha256.
 2. Compares against `binaries.X.sha256.<os>_<arch>`.
 3. If mismatched → refuses to run, prints expected vs actual, exits non-zero.
 4. If the platform key is missing → prints a warning but still runs in `permissive` mode (configurable).
 
-The hash is cached in memory for the lifetime of the process (a single `aegis run`) to avoid re-hashing between checks.
+The hash is cached in memory for the lifetime of the process (a single `lintel run`) to avoid re-hashing between checks.
 
 ### 6.3 Version Enforcement
 
 `binaries.X.version` is compared against the scanner's `--version` output (pattern-matched per scanner). Mismatch → warning by default, block if `strict_versions: true` is set.
 
-### 6.4 `aegis install <tool>` (v1.1+)
+### 6.4 `lintel install <tool>` (v1.1+)
 
-Optional convenience. Downloads the pinned release from the configured `install_hint`, verifies sha256, places it at `~/.aegis/bin/X`, sets mode 0755. Never installs system-wide. Refuses to run if the download URL is not HTTPS from a known-good host (`github.com`, `objects.githubusercontent.com`, etc.).
+Optional convenience. Downloads the pinned release from the configured `install_hint`, verifies sha256, places it at `~/.lintel/bin/X`, sets mode 0755. Never installs system-wide. Refuses to run if the download URL is not HTTPS from a known-good host (`github.com`, `objects.githubusercontent.com`, etc.).
 
 ---
 
@@ -448,7 +448,7 @@ type Finding struct {
 - **Pre-commit flow:**
   1. Run scanner on staged files only.
   2. For each finding, check `warn_paths`: if matched, demote to `warn`.
-  3. Check inline ignore comment `// aegis:ignore-secret <reason>` on the same or previous line; if present and `reason` non-empty → suppress.
+  3. Check inline ignore comment `// lintel:ignore-secret <reason>` on the same or previous line; if present and `reason` non-empty → suppress.
   4. Block if any finding remains and `mode: block`.
 - **Pre-push flow (if configured):** run `gitleaks detect` over new commits (`HEAD...@{upstream}`).
 - **Snippet redaction:** secret values are **never** printed in full. Show first/last 4 chars only.
@@ -460,7 +460,7 @@ type Finding struct {
 - Runs only on staged files in pre-commit; respects `exclude_paths`.
 - Rulesets can be registry refs (`p/security-audit`) or local directories.
 - Severity mapping: Semgrep/OpenGrep `ERROR → HIGH`, `WARNING → MEDIUM`, `INFO → LOW`.
-- **Note on "malicious code":** Aegis positions this as "insecure or suspicious patterns" - injection sinks, eval-of-user-input, hardcoded keys, unsafe deserialization, etc. It is **not** behavioral malware detection. The CLI prints this clarification on first run.
+- **Note on "malicious code":** Lintel positions this as "insecure or suspicious patterns" - injection sinks, eval-of-user-input, hardcoded keys, unsafe deserialization, etc. It is **not** behavioral malware detection. The CLI prints this clarification on first run.
 
 ### 8.3 Dependency Vulnerabilities (SCA)
 
@@ -477,14 +477,14 @@ type Finding struct {
 ### 8.4 Linting
 
 - Per-language adapters pick the canonical tool (see defaults in §5 and appendix A).
-- **Staged-only** by default. For languages with multi-file awareness (TypeScript, Java), Aegis passes the minimal context needed (project root + staged files); the adapter handles how.
+- **Staged-only** by default. For languages with multi-file awareness (TypeScript, Java), Lintel passes the minimal context needed (project root + staged files); the adapter handles how.
 - `mode: warn` by default - lint never blocks a commit. Teams that want strict lint set `mode: block`.
 - `auto_fix: true` runs the tool's `--fix` (or equivalent), then `git add` the touched files before the next check runs.
 
 ### 8.5 Formatting
 
 - Same model as linting, but with `mode: fix` as default.
-- After auto-format, changed files are re-staged. If the formatter changes a file that the developer also had unstaged changes in, Aegis **aborts** with a clear error - it never silently discards unstaged work.
+- After auto-format, changed files are re-staged. If the formatter changes a file that the developer also had unstaged changes in, Lintel **aborts** with a clear error - it never silently discards unstaged work.
 
 ---
 
@@ -494,11 +494,11 @@ type Finding struct {
 git commit
     │
     ▼
-.git/hooks/pre-commit  →  aegis run --hook pre-commit
+.git/hooks/pre-commit  →  lintel run --hook pre-commit
                               │
                               ▼
                       ┌───────────────┐
-                      │ 1. Load spec  │  parse aegis.yaml, validate schema
+                      │ 1. Load spec  │  parse lintel.yaml, validate schema
                       └───────────────┘
                               │
                               ▼
@@ -582,7 +582,7 @@ For checks listed in `scope.full_scan_for`, the full repo file set is used inste
 ### 11.1 Pretty (default)
 
 ```
-╭─ Aegis  v0.4.2  ──────────────────────────────────────╮
+╭─ Lintel  v0.4.2  ──────────────────────────────────────╮
 │ repo: my-service       stacks: [npm, go]             │
 │ staged: 14 files (1,203 lines)                       │
 ╰───────────────────────────────────────────────────────╯
@@ -615,7 +615,7 @@ For checks listed in `scope.full_scan_for`, the full repo file set is used inste
     CVE-2021-23337 (HIGH) - Command Injection
 
 ✖ commit blocked - 2 blocking findings
-  bypass: AEGIS_SKIP=secrets,malicious_code git commit  (requires reason)
+  bypass: LINTEL_SKIP=secrets,malicious_code git commit  (requires reason)
 ```
 
 ### 11.2 JSON
@@ -625,7 +625,7 @@ Stable schema, one object per run:
 ```json
 {
   "version": 1,
-  "aegis_version": "0.4.2",
+  "lintel_version": "0.4.2",
   "repo": "my-service",
   "stacks": ["npm", "go"],
   "started_at": "2026-04-21T10:12:33Z",
@@ -653,7 +653,7 @@ Optional (`output.format: junit`) for CI systems that only parse JUnit XML.
 | 2    | Configuration error (invalid spec, missing required field)    |
 | 3    | Binary resolution or verification failure                     |
 | 4    | Scanner crashed or timed out                                  |
-| 5    | Internal error (bug in Aegis)                                 |
+| 5    | Internal error (bug in Lintel)                                 |
 | 130  | Interrupted (SIGINT)                                          |
 
 ---
@@ -661,23 +661,23 @@ Optional (`output.format: junit`) for CI systems that only parse JUnit XML.
 ## 12. CLI Reference
 
 ```
-aegis <command> [flags]
+lintel <command> [flags]
 ```
 
 | Command                | Purpose                                                          |
 |------------------------|------------------------------------------------------------------|
-| `aegis init`           | Create `.aegis/aegis.yaml` with defaults based on auto-detection |
-| `aegis install`        | Install Git hooks (creates `.git/hooks/*`)                       |
-| `aegis uninstall`      | Remove Git hooks                                                 |
-| `aegis run`            | Run all enabled checks (no hook context)                         |
-| `aegis run --hook <h>` | Run the set of checks configured for hook `h`                    |
-| `aegis run --check <c>`| Run a single check                                               |
-| `aegis doctor`         | Verify binaries, versions, sha256; print environment diagnostics |
-| `aegis baseline`       | Snapshot current findings into `.aegis/baseline.json`            |
-| `aegis ignore <rule>`  | Add a rule to the allowlist (interactive)                        |
-| `aegis fmt`            | Shortcut for `aegis run --check format`                          |
-| `aegis version`        | Print Aegis version and schema version                           |
-| `aegis explain <rule>` | Print documentation for a rule (delegates to scanner)            |
+| `lintel init`           | Create `.lintel/lintel.yaml` with defaults based on auto-detection |
+| `lintel install`        | Install Git hooks (creates `.git/hooks/*`)                       |
+| `lintel uninstall`      | Remove Git hooks                                                 |
+| `lintel run`            | Run all enabled checks (no hook context)                         |
+| `lintel run --hook <h>` | Run the set of checks configured for hook `h`                    |
+| `lintel run --check <c>`| Run a single check                                               |
+| `lintel doctor`         | Verify binaries, versions, sha256; print environment diagnostics |
+| `lintel baseline`       | Snapshot current findings into `.lintel/baseline.json`            |
+| `lintel ignore <rule>`  | Add a rule to the allowlist (interactive)                        |
+| `lintel fmt`            | Shortcut for `lintel run --check format`                          |
+| `lintel version`        | Print Lintel version and schema version                           |
+| `lintel explain <rule>` | Print documentation for a rule (delegates to scanner)            |
 
 Global flags: `--config <path>`, `--output <format>`, `--quiet`, `--verbose`, `--no-color`.
 
@@ -687,12 +687,12 @@ Global flags: `--config <path>`, `--output <format>`, `--quiet`, `--verbose`, `-
 
 ### 13.1 Installation
 
-`aegis install` writes scripts like:
+`lintel install` writes scripts like:
 
 ```bash
 #!/usr/bin/env sh
-# .git/hooks/pre-commit - generated by aegis; do not edit
-exec aegis run --hook pre-commit "$@"
+# .git/hooks/pre-commit - generated by lintel; do not edit
+exec lintel run --hook pre-commit "$@"
 ```
 
 It never overwrites an existing hook without `--force`. If one exists, it appends an `include` call and warns the user.
@@ -706,10 +706,10 @@ It never overwrites an existing hook without `--force`. If one exists, it append
 
 ### 13.3 `--no-verify` Defense
 
-Git's `--no-verify` bypasses all hooks. Aegis cannot intercept this from the hook itself. Mitigations:
+Git's `--no-verify` bypasses all hooks. Lintel cannot intercept this from the hook itself. Mitigations:
 
-1. Document this clearly; teams enforce via CI running `aegis run --hook pre-commit` on every PR.
-2. Optionally, `aegis install --server-side` writes a pre-receive hook on the remote (self-hosted Git servers only).
+1. Document this clearly; teams enforce via CI running `lintel run --hook pre-commit` on every PR.
+2. Optionally, `lintel install --server-side` writes a pre-receive hook on the remote (self-hosted Git servers only).
 3. `override.allow_no_verify: false` has no runtime effect on the local machine but signals intent and is logged by server-side enforcement.
 
 ---
@@ -718,7 +718,7 @@ Git's `--no-verify` bypasses all hooks. Aegis cannot intercept this from the hoo
 
 Three layers, evaluated in order:
 
-### 14.1 Allowlist (`.aegis/allowlist.yaml`)
+### 14.1 Allowlist (`.lintel/allowlist.yaml`)
 
 Path- or rule-scoped, **requires a reason**:
 
@@ -735,9 +735,9 @@ entries:
 
 Expired entries are ignored and produce a warning.
 
-### 14.2 Baseline (`.aegis/baseline.json`)
+### 14.2 Baseline (`.lintel/baseline.json`)
 
-Snapshot of existing findings at the moment `aegis baseline` was run. New findings must be *truly new* (not in the baseline) to block. This is how a team adopts Aegis on a legacy codebase without a flag day.
+Snapshot of existing findings at the moment `lintel baseline` was run. New findings must be *truly new* (not in the baseline) to block. This is how a team adopts Lintel on a legacy codebase without a flag day.
 
 Matching is done by `(check, rule_id, file, normalized_snippet_hash)`. Line numbers are not part of the key (files get reformatted).
 
@@ -746,12 +746,12 @@ Matching is done by `(check, rule_id, file, normalized_snippet_hash)`. Line numb
 Per-language comment markers on the same or preceding line:
 
 ```go
-// aegis:ignore-secret  reason="test fixture, not a real key"
+// lintel:ignore-secret  reason="test fixture, not a real key"
 testKey := "AKIAFAKEFAKEFAKE1234"
 ```
 
 ```python
-# aegis:ignore-rule=SQLi.raw-concat  reason="hardened elsewhere"
+# lintel:ignore-rule=SQLi.raw-concat  reason="hardened elsewhere"
 ```
 
 **A reason is mandatory.** An inline ignore without a reason is itself a finding.
@@ -760,47 +760,47 @@ testKey := "AKIAFAKEFAKEFAKE1234"
 
 ## 15. Override / Bypass
 
-Emergencies happen. Aegis supports skipping with an audit trail:
+Emergencies happen. Lintel supports skipping with an audit trail:
 
 ```bash
-AEGIS_SKIP=secrets,lint AEGIS_REASON="hotfix CVE-2026-XYZ, audit ticket 9912" \
+LINTEL_SKIP=secrets,lint LINTEL_REASON="hotfix CVE-2026-XYZ, audit ticket 9912" \
   git commit -m "..."
 ```
 
 Behavior:
 
-- Skipped checks are logged to `.aegis/overrides.log` with user, timestamp, commit hash, and reason.
-- If `override.require_reason: true` (default) and `AEGIS_REASON` is unset, the skip is refused.
-- `AEGIS_SKIP=all` is allowed but always requires a reason and is flagged as a critical event.
+- Skipped checks are logged to `.lintel/overrides.log` with user, timestamp, commit hash, and reason.
+- If `override.require_reason: true` (default) and `LINTEL_REASON` is unset, the skip is refused.
+- `LINTEL_SKIP=all` is allowed but always requires a reason and is flagged as a critical event.
 - Overrides never suppress `secrets` findings if `override.protect_secrets: true` (the only non-skippable gate).
 
 ---
 
 ## 16. Security Model (Meta)
 
-Aegis is itself a supply-chain-sensitive tool. It executes external binaries with the full privileges of the developer's shell. Threat model:
+Lintel is itself a supply-chain-sensitive tool. It executes external binaries with the full privileges of the developer's shell. Threat model:
 
 ### 16.1 Threats
 
 - **Malicious scanner binary.** A scanner is replaced with a credential stealer (see the 2026 Trivy incident: compromised releases on GitHub, Docker Hub, and GitHub Actions exposed CI/CD secrets and credentials).
-- **Malicious Aegis release.** Our own binary is compromised.
+- **Malicious Lintel release.** Our own binary is compromised.
 - **Malicious spec file.** A PR introduces a spec that points `binaries.X.path` at something evil.
 - **Malicious custom rules.** A PR adds an OpenGrep rule that does something pathological (ReDoS, exfil via rule metadata if the scanner ever supports it).
 
 ### 16.2 Mitigations
 
 1. **Mandatory sha256 verification** of every external binary on every run.
-2. **No auto-download by default.** `aegis install <tool>` is opt-in; when used, downloads only over HTTPS from allow-listed hosts.
+2. **No auto-download by default.** `lintel install <tool>` is opt-in; when used, downloads only over HTTPS from allow-listed hosts.
 3. **Spec schema limits.** `binaries.X.path` is rejected if it resolves outside: repo root, `$HOME`, or absolute system paths. Relative paths inside the repo (i.e., pointing at a vendored binary) are **always rejected** - defense in depth against a malicious PR slipping a binary in.
-4. **Signed releases.** Aegis binaries are published with Sigstore cosign signatures and a SLSA Level 3 provenance attestation. `aegis version --verify` checks its own binary.
+4. **Signed releases.** Lintel binaries are published with Sigstore cosign signatures and a SLSA Level 3 provenance attestation. `lintel version --verify` checks its own binary.
 5. **Reproducible builds.** The build is bit-reproducible; anyone can verify the release from source.
-6. **Capability minimization.** Aegis does not open outbound network connections except when: (a) downloading the OSV DB for the `dependencies` check in online mode, (b) the user runs `aegis install <tool>`. Both are explicit.
-7. **Read-only config at runtime.** Aegis never writes to `.aegis/aegis.yaml`. It only writes to `.aegis/baseline.json` (on `aegis baseline`), `.aegis/overrides.log` (on bypass), and `~/.aegis/cache/*`.
+6. **Capability minimization.** Lintel does not open outbound network connections except when: (a) downloading the OSV DB for the `dependencies` check in online mode, (b) the user runs `lintel install <tool>`. Both are explicit.
+7. **Read-only config at runtime.** Lintel never writes to `.lintel/lintel.yaml`. It only writes to `.lintel/baseline.json` (on `lintel baseline`), `.lintel/overrides.log` (on bypass), and `~/.lintel/cache/*`.
 8. **Telemetry off by default, no dark patterns.** No phone-home.
 
 ### 16.3 Secure defaults
 
-The `aegis init`-generated config sets `block` mode for secrets, malicious_code, and dependencies; `require_reason: true`; `allow_no_verify: false`; `strict_versions: true`. Users opt *down*, never up.
+The `lintel init`-generated config sets `block` mode for secrets, malicious_code, and dependencies; `require_reason: true`; `allow_no_verify: false`; `strict_versions: true`. Users opt *down*, never up.
 
 ---
 
@@ -808,7 +808,7 @@ The `aegis init`-generated config sets `block` mode for secrets, malicious_code,
 
 | Metric                                              | Budget         |
 |-----------------------------------------------------|----------------|
-| `aegis run --hook pre-commit` p95 on 10k staged LOC | < 5 seconds    |
+| `lintel run --hook pre-commit` p95 on 10k staged LOC | < 5 seconds    |
 | Binary sha256 verify overhead (per binary, cached)  | < 50 ms        |
 | Spec parse + validate                               | < 20 ms        |
 | Memory, peak                                        | < 250 MB       |
@@ -846,7 +846,7 @@ type CheckInput struct {
     RepoRoot    string
     StagedFiles []string
     FullTree    bool
-    Config      json.RawMessage  // the checker's subtree from aegis.yaml
+    Config      json.RawMessage  // the checker's subtree from lintel.yaml
     Binaries    map[string]ResolvedBinary
 }
 
@@ -873,9 +873,9 @@ Example:
 
 ```
 ✖ spec error: checks.secrets.engine has unknown value "gitleaksz"
-  file:    .aegis/aegis.yaml:18:12
+  file:    .lintel/lintel.yaml:18:12
   allowed: gitleaks, trufflehog, detect-secrets
-  docs:    https://github.com/<org>/aegis/docs/secrets#engine
+  docs:    https://github.com/<org>/lintel/docs/secrets#engine
 ```
 
 No stack traces by default. `--verbose` enables them.
@@ -885,11 +885,11 @@ No stack traces by default. `--verbose` enables them.
 ## 20. Distribution
 
 - **GitHub Releases** with binaries for `linux_{amd64,arm64}`, `darwin_{amd64,arm64}`, `windows_amd64`.
-- **Homebrew tap** (`brew install <org>/tap/aegis`).
+- **Homebrew tap** (`brew install <org>/tap/lintel`).
 - **Scoop bucket** for Windows.
 - **Debian/RPM** packages via `nfpm`.
-- **Docker image** (`ghcr.io/<org>/aegis:<version>`), minimal base, single binary.
-- **Install script** (`curl -sSL https://aegis.<domain>/install.sh | sh`) - with sha256 + signature verification baked in.
+- **Docker image** (`ghcr.io/<org>/lintel:<version>`), minimal base, single binary.
+- **Install script** (`curl -sSL https://lintel.<domain>/install.sh | sh`) - with sha256 + signature verification baked in.
 - **No `npm install`, no `pip install`.** Those would contradict the zero-runtime goal.
 
 Every release includes: the binary, its sha256, its Sigstore signature, a SLSA provenance attestation, an SBOM (CycloneDX).
@@ -912,7 +912,7 @@ Every release includes: the binary, its sha256, its Sigstore signature, a SLSA p
 - Additional engines: trufflehog, grype.
 - Stacks: maven, gradle, cargo, composer, bundler.
 - SARIF and JUnit output.
-- `aegis install <tool>` helper.
+- `lintel install <tool>` helper.
 - Windows first-class support.
 
 ### v1.2
@@ -953,24 +953,24 @@ See §11.5.
 
 | Variable              | Purpose                                                        |
 |-----------------------|----------------------------------------------------------------|
-| `AEGIS_SKIP`          | Comma-separated checks to skip (e.g., `secrets,lint`)          |
-| `AEGIS_REASON`        | Required justification when `override.require_reason: true`    |
-| `AEGIS_BIN_DIR`       | Override directory Aegis searches for scanner binaries         |
-| `AEGIS_CONFIG`        | Alternate path to the spec file                                |
-| `AEGIS_NO_COLOR`      | Disable colored output                                         |
-| `AEGIS_CACHE_DIR`     | Override cache directory (default `~/.aegis/cache`)            |
-| `AEGIS_OFFLINE`       | Force offline mode globally                                    |
+| `LINTEL_SKIP`          | Comma-separated checks to skip (e.g., `secrets,lint`)          |
+| `LINTEL_REASON`        | Required justification when `override.require_reason: true`    |
+| `LINTEL_BIN_DIR`       | Override directory Lintel searches for scanner binaries         |
+| `LINTEL_CONFIG`        | Alternate path to the spec file                                |
+| `LINTEL_NO_COLOR`      | Disable colored output                                         |
+| `LINTEL_CACHE_DIR`     | Override cache directory (default `~/.lintel/cache`)            |
+| `LINTEL_OFFLINE`       | Force offline mode globally                                    |
 | `NO_COLOR`            | Honored per the no-color.org convention                        |
 
 ## Appendix D - Glossary
 
-- **Check.** One of the five Aegis-defined analysis categories.
+- **Check.** One of the five Lintel-defined analysis categories.
 - **Engine.** The underlying scanner a check is configured to use.
 - **Finding.** A single normalized result produced by a check.
 - **Gate.** The stage that decides which findings are blocking.
 - **Baseline.** A committed list of pre-existing findings to exclude.
 - **Allowlist.** A reason-justified suppression list.
-- **Spec file.** `.aegis/aegis.yaml`.
+- **Spec file.** `.lintel/lintel.yaml`.
 
 ---
 

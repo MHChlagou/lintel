@@ -1,6 +1,6 @@
 # Scanners
 
-Aegis coordinates the scanners below. Each page covers: what the scanner does, how Aegis invokes it, the check it belongs to, the stacks it serves, severity mapping, and upstream references.
+Lintel coordinates the scanners below. Each page covers: what the scanner does, how Lintel invokes it, the check it belongs to, the stacks it serves, severity mapping, and upstream references.
 
 | Scanner          | Check           | Stacks              | Purpose                              |
 | ---------------- | --------------- | ------------------- | ------------------------------------ |

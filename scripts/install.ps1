@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-  Install Aegis on Windows.
+  Install Lintel on Windows.
 
 .DESCRIPTION
-  Downloads the aegis release binary for the current architecture,
+  Downloads the lintel release binary for the current architecture,
   verifies its SHA256 against the .sha256 sidecar shipped with every
   release, optionally verifies the Sigstore bundle with cosign, and
   installs to $env:USERPROFILE\bin by default.
@@ -19,27 +19,27 @@
 
 .EXAMPLE
   # Pipe install (non-interactive)
-  iwr https://raw.githubusercontent.com/MHChlagou/aegis/main/scripts/install.ps1 -UseBasicParsing | iex
+  iwr https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.ps1 -UseBasicParsing | iex
 
 .EXAMPLE
   # Pin a specific version
   .\install.ps1 -Version v0.2.0
 
 .NOTES
-  Windows locks running executables. Close any open aegis.exe processes
+  Windows locks running executables. Close any open lintel.exe processes
   before re-running this script to upgrade in place.
 #>
 
 [CmdletBinding()]
 param(
-  [string]$Version = $(if ($env:AEGIS_VERSION) { $env:AEGIS_VERSION } else { 'latest' }),
-  [string]$InstallDir = $(if ($env:AEGIS_INSTALL_DIR) { $env:AEGIS_INSTALL_DIR } else { Join-Path $env:USERPROFILE 'bin' }),
+  [string]$Version = $(if ($env:LINTEL_VERSION) { $env:LINTEL_VERSION } else { 'latest' }),
+  [string]$InstallDir = $(if ($env:LINTEL_INSTALL_DIR) { $env:LINTEL_INSTALL_DIR } else { Join-Path $env:USERPROFILE 'bin' }),
   [switch]$NoCosign
 )
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'  # suppresses iwr progress spam
-$repo = 'MHChlagou/aegis'
+$repo = 'MHChlagou/lintel'
 
 # Architecture detection — currently only amd64 ships for Windows, but
 # keep the lookup table in place so adding arm64 later is one line.
@@ -47,10 +47,10 @@ $rtArch = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitectu
 $arch = switch ($rtArch) {
   'X64'   { 'amd64' }
   'Arm64' { 'arm64' }
-  default { throw "aegis-install: unsupported architecture: $rtArch" }
+  default { throw "lintel-install: unsupported architecture: $rtArch" }
 }
 
-$asset = "aegis-windows-$arch.exe"
+$asset = "lintel-windows-$arch.exe"
 $base = if ($Version -eq 'latest') {
   "https://github.com/$repo/releases/latest/download"
 } else {
@@ -58,16 +58,16 @@ $base = if ($Version -eq 'latest') {
 }
 $url = "$base/$asset"
 
-$tmp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP ("aegis-install-" + [System.IO.Path]::GetRandomFileName()))
+$tmp = New-Item -ItemType Directory -Path (Join-Path $env:TEMP ("lintel-install-" + [System.IO.Path]::GetRandomFileName()))
 try {
   Write-Host "↓ downloading $url"
-  Invoke-WebRequest -UseBasicParsing -Uri $url              -OutFile (Join-Path $tmp 'aegis.exe')
-  Invoke-WebRequest -UseBasicParsing -Uri "$url.sha256"     -OutFile (Join-Path $tmp 'aegis.sha256')
+  Invoke-WebRequest -UseBasicParsing -Uri $url              -OutFile (Join-Path $tmp 'lintel.exe')
+  Invoke-WebRequest -UseBasicParsing -Uri "$url.sha256"     -OutFile (Join-Path $tmp 'lintel.sha256')
 
-  $expected = (Get-Content (Join-Path $tmp 'aegis.sha256') -Raw).Trim().Split()[0].ToLower()
-  $actual = (Get-FileHash -Algorithm SHA256 (Join-Path $tmp 'aegis.exe')).Hash.ToLower()
+  $expected = (Get-Content (Join-Path $tmp 'lintel.sha256') -Raw).Trim().Split()[0].ToLower()
+  $actual = (Get-FileHash -Algorithm SHA256 (Join-Path $tmp 'lintel.exe')).Hash.ToLower()
   if ($expected -ne $actual) {
-    throw "aegis-install: SHA256 mismatch — refusing to install.`n  expected: $expected`n  actual:   $actual"
+    throw "lintel-install: SHA256 mismatch — refusing to install.`n  expected: $expected`n  actual:   $actual"
   }
   Write-Host "✓ sha256 verified"
 
@@ -76,14 +76,14 @@ try {
   # script would nudge them toward -NoCosign, which defeats the point.
   $verifyCosign = -not $NoCosign -and (Get-Command cosign -ErrorAction SilentlyContinue)
   if ($verifyCosign) {
-    Invoke-WebRequest -UseBasicParsing -Uri "$url.sigstore" -OutFile (Join-Path $tmp 'aegis.sigstore')
+    Invoke-WebRequest -UseBasicParsing -Uri "$url.sigstore" -OutFile (Join-Path $tmp 'lintel.sigstore')
     & cosign verify-blob `
-      --bundle (Join-Path $tmp 'aegis.sigstore') `
+      --bundle (Join-Path $tmp 'lintel.sigstore') `
       --certificate-identity-regexp "^https://github.com/$repo/" `
       --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' `
-      (Join-Path $tmp 'aegis.exe') | Out-Null
+      (Join-Path $tmp 'lintel.exe') | Out-Null
     if ($LASTEXITCODE -ne 0) {
-      throw "aegis-install: cosign verification failed"
+      throw "lintel-install: cosign verification failed"
     }
     Write-Host "✓ cosign signature verified"
   } elseif (-not $NoCosign) {
@@ -93,8 +93,8 @@ try {
   if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
   }
-  $dest = Join-Path $InstallDir 'aegis.exe'
-  Move-Item -Force -Path (Join-Path $tmp 'aegis.exe') -Destination $dest
+  $dest = Join-Path $InstallDir 'lintel.exe'
+  Move-Item -Force -Path (Join-Path $tmp 'lintel.exe') -Destination $dest
   Write-Host "✓ installed $dest"
   Write-Host ""
   & $dest version

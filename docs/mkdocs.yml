@@ -1,10 +1,10 @@
-site_name: Aegis
+site_name: Lintel
 site_description: The shield your commits pass through. A single-binary, shift-left security orchestrator for Git hooks and CI.
-site_url: https://MHChlagou.github.io/aegis/
-repo_name: MHChlagou/aegis
-repo_url: https://github.com/MHChlagou/aegis
+site_url: https://MHChlagou.github.io/lintel/
+repo_name: MHChlagou/lintel
+repo_url: https://github.com/MHChlagou/lintel
 edit_uri: edit/main/docs/docs/
-copyright: "© 2026 The Aegis Authors. Released under the MIT License."
+copyright: "© 2026 The Lintel Authors. Released under the MIT License."
 
 docs_dir: docs
 
@@ -59,7 +59,7 @@ extra:
     default: latest
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/MHChlagou/aegis
+      link: https://github.com/MHChlagou/lintel
   generator: false
 
 markdown_extensions:
@@ -111,7 +111,7 @@ nav:
       - Installation: installation.md
       - Your first scan: first-scan.md
   - Configuration:
-      - The aegis.yaml file: configuration.md
+      - The lintel.yaml file: configuration.md
       - Stacks and detection: stacks.md
       - Severities and gates: severities.md
       - Baseline and allowlist: baseline-allowlist.md

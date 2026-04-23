@@ -3,7 +3,7 @@
 # Every entry declares, for one scanner at one version on one platform:
 #   - the upstream release asset URL (must be HTTPS + host-allowlisted)
 #   - archive_sha256: hash of the asset as downloaded (verified by
-#                     `aegis install` before extraction)
+#                     `lintel install` before extraction)
 #   - binary_sha256:  hash of the extracted executable on disk (verified
 #                     by the resolver every time the scanner is invoked)
 #   - how to extract the binary (archive type + binary name)

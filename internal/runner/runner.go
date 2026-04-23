@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MHChlagou/aegis/internal/checker"
-	"github.com/MHChlagou/aegis/internal/config"
+	"github.com/MHChlagou/lintel/internal/checker"
+	"github.com/MHChlagou/lintel/internal/config"
 )
 
 type Result struct {

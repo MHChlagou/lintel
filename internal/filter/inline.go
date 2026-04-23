@@ -7,14 +7,14 @@ import (
 )
 
 // InlineIgnored reports whether the given file:line (or the preceding line)
-// carries an "aegis:ignore-..." directive with a non-empty reason.
+// carries an "lintel:ignore-..." directive with a non-empty reason.
 //
 // Accepted forms (on the same or preceding line):
 //
-//	// aegis:ignore-secret  reason="test fixture"
-//	# aegis:ignore-rule=SQLi.raw-concat  reason="hardened elsewhere"
+//	// lintel:ignore-secret  reason="test fixture"
+//	# lintel:ignore-rule=SQLi.raw-concat  reason="hardened elsewhere"
 //
-// A bare `aegis:ignore-*` without a reason is itself a finding caller can surface.
+// A bare `lintel:ignore-*` without a reason is itself a finding caller can surface.
 func InlineIgnored(path string, line int, marker, rule string) (bool, bool, error) {
 	if line <= 0 {
 		return false, false, nil
@@ -37,12 +37,12 @@ func InlineIgnored(path string, line int, marker, rule string) (bool, bool, erro
 		}
 	}
 	for _, candidate := range []string{cur, prev} {
-		if !strings.Contains(candidate, marker) && !strings.Contains(candidate, "aegis:ignore") {
+		if !strings.Contains(candidate, marker) && !strings.Contains(candidate, "lintel:ignore") {
 			continue
 		}
 		// Rule-scoped ignores must name the rule.
-		if strings.Contains(candidate, "aegis:ignore-rule=") {
-			want := "aegis:ignore-rule=" + rule
+		if strings.Contains(candidate, "lintel:ignore-rule=") {
+			want := "lintel:ignore-rule=" + rule
 			if !strings.Contains(candidate, want) {
 				continue
 			}

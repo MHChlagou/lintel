@@ -1,13 +1,13 @@
-# `aegis install` / `aegis uninstall`
+# `lintel install` / `lintel uninstall`
 
-Install or remove the Git hooks that dispatch to `aegis run`.
+Install or remove the Git hooks that dispatch to `lintel run`.
 
-## `aegis install`
+## `lintel install`
 
 ### Usage
 
 ```bash
-aegis install [flags]
+lintel install [flags]
 ```
 
 ### Flags
@@ -22,50 +22,50 @@ aegis install [flags]
 For each hook name (`pre-commit`, `pre-push`):
 
 1. Checks whether `.git/hooks/<name>` exists.
-2. If it is an **Aegis-managed** hook (identified by a magic marker), rewrites it with the current version's shim.
+2. If it is an **Lintel-managed** hook (identified by a magic marker), rewrites it with the current version's shim.
 3. If it is a **foreign** hook (Husky, lefthook, hand-written):
-    - Without `--force`: the foreign hook is preserved and Aegis adds itself as a delegating shim that calls the foreign hook first, then `aegis run --hook <name>`.
+    - Without `--force`: the foreign hook is preserved and Lintel adds itself as a delegating shim that calls the foreign hook first, then `lintel run --hook <name>`.
     - With `--force`: the foreign hook is replaced. A backup is saved to `.git/hooks/<name>.bak`.
 4. Sets the file executable.
 
 ### Coexisting with other hook managers
 
-Aegis's magic marker makes `install` idempotent and makes `uninstall` safe: Aegis will never remove a hook it did not install. If Husky is in charge of the hook, `aegis install` delegates; on `aegis uninstall`, the Aegis delegation is removed and the Husky hook remains.
+Lintel's magic marker makes `install` idempotent and makes `uninstall` safe: Lintel will never remove a hook it did not install. If Husky is in charge of the hook, `lintel install` delegates; on `lintel uninstall`, the Lintel delegation is removed and the Husky hook remains.
 
 ### Example
 
 ```bash
-aegis install
+lintel install
 # installed pre-commit
 # installed pre-push (delegating to husky)
 ```
 
-## `aegis uninstall`
+## `lintel uninstall`
 
 ### Usage
 
 ```bash
-aegis uninstall [flags]
+lintel uninstall [flags]
 ```
 
 ### Flags
 
 | Flag         | Default  | Purpose                                                  |
 | ------------ | -------- | -------------------------------------------------------- |
-| `--hooks`    | all Aegis-managed | Comma-separated list of hooks to remove         |
+| `--hooks`    | all Lintel-managed | Comma-separated list of hooks to remove         |
 
 ### What it does
 
-For each hook Aegis installed:
+For each hook Lintel installed:
 
-1. If Aegis is the only content of the hook, deletes the hook file.
-2. If Aegis was delegating to a foreign hook, removes the delegation and restores the foreign hook.
-3. Leaves any non-Aegis hook untouched.
+1. If Lintel is the only content of the hook, deletes the hook file.
+2. If Lintel was delegating to a foreign hook, removes the delegation and restores the foreign hook.
+3. Leaves any non-Lintel hook untouched.
 
 ### Example
 
 ```bash
-aegis uninstall
+lintel uninstall
 # removed pre-commit
 # restored pre-push (husky)
 ```

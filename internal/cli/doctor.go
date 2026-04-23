@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/MHChlagou/aegis/internal/config"
+	"github.com/MHChlagou/lintel/internal/config"
 )
 
 func cmdDoctor() *cobra.Command {
@@ -56,7 +56,7 @@ func cmdDoctor() *cobra.Command {
 // renderFixHint prints a single consolidated remediation hint after a doctor
 // run that had failures. The rule is simple: name the one scanner if only
 // one failed, otherwise point at --all. gofmt is special-cased because it
-// ships with the Go toolchain and cannot be fetched by `aegis install`.
+// ships with the Go toolchain and cannot be fetched by `lintel install`.
 func renderFixHint(w io.Writer, failed []string) {
 	installable := make([]string, 0, len(failed))
 	gofmtFailed := false
@@ -74,9 +74,9 @@ func renderFixHint(w io.Writer, failed []string) {
 			fpln(w, "↳ gofmt ships with the Go toolchain — install Go to fix this row")
 		}
 	case 1:
-		fpf(w, "↳ run: aegis install %s\n", installable[0])
+		fpf(w, "↳ run: lintel install %s\n", installable[0])
 	default:
-		fpln(w, "↳ run: aegis install --all")
+		fpln(w, "↳ run: lintel install --all")
 	}
 
 	if gofmtFailed && len(installable) > 0 {

@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/MHChlagou/aegis/internal/config"
-	"github.com/MHChlagou/aegis/internal/detect"
-	"github.com/MHChlagou/aegis/internal/finding"
-	"github.com/MHChlagou/aegis/internal/resolve"
+	"github.com/MHChlagou/lintel/internal/config"
+	"github.com/MHChlagou/lintel/internal/detect"
+	"github.com/MHChlagou/lintel/internal/finding"
+	"github.com/MHChlagou/lintel/internal/resolve"
 )
 
 type Stats struct {

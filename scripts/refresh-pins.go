@@ -4,7 +4,7 @@
 // internal/installer/scanners.yaml, computes both its archive_sha256 and
 // (after extraction) its binary_sha256, and rewrites the file in place.
 //
-// This is a release-engineering tool, not part of the shipped aegis binary
+// This is a release-engineering tool, not part of the shipped lintel binary
 // (the //go:build ignore tag excludes it from the main module's build).
 // Run it before cutting a release:
 //
@@ -34,7 +34,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/MHChlagou/aegis/internal/installer"
+	"github.com/MHChlagou/lintel/internal/installer"
 )
 
 // pinEntry matches a url + archive_sha256 + binary_sha256 triplet. The

@@ -6,19 +6,19 @@
 
 ## What it does
 
-`shellcheck` is a static analyzer for shell scripts. Aegis uses it for the `lint` check on `shell` stack files.
+`shellcheck` is a static analyzer for shell scripts. Lintel uses it for the `lint` check on `shell` stack files.
 
-## How Aegis invokes it
+## How Lintel invokes it
 
 ```text
 shellcheck --format=json1 --severity=style <staged shell files>
 ```
 
-- `--severity=style`: report everything from `style` up. Aegis maps down to its three-level severity scale below.
+- `--severity=style`: report everything from `style` up. Lintel maps down to its three-level severity scale below.
 
 ## Severity mapping
 
-| shellcheck level | Aegis severity |
+| shellcheck level | Lintel severity |
 | ---------------- | -------------- |
 | `error`          | `error`        |
 | `warning`        | `warn`         |
@@ -36,11 +36,11 @@ scanners:
       linux/amd64: "…"
 ```
 
-`shellcheck` reads `.shellcheckrc` for per-repo config. Aegis does not intermediate.
+`shellcheck` reads `.shellcheckrc` for per-repo config. Lintel does not intermediate.
 
 ## Which files count as shell?
 
-Aegis classifies a file as `shell` if:
+Lintel classifies a file as `shell` if:
 
 - Extension is `.sh`, `.bash`, `.zsh`, `.ksh`.
 - OR the first line is a shebang matching `#!/.*sh`.

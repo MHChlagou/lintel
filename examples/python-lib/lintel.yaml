@@ -1,4 +1,4 @@
-# Aegis config for a Python library using ruff + gitleaks + osv-scanner.
+# Lintel config for a Python library using ruff + gitleaks + osv-scanner.
 # Ruff handles both lint and format; no separate Python formatter is wired.
 
 schema: 1

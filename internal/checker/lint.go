@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MHChlagou/aegis/internal/detect"
-	"github.com/MHChlagou/aegis/internal/finding"
+	"github.com/MHChlagou/lintel/internal/detect"
+	"github.com/MHChlagou/lintel/internal/finding"
 )
 
 type Lint struct{}
@@ -86,7 +86,7 @@ func runLinter(ctx context.Context, in CheckInput, tool string, files []string, 
 	if err != nil {
 		// Missing lint tool is non-fatal when mode=warn: the gate marks nothing blocking.
 		return []finding.Finding{{
-			Check: "lint", RuleID: "aegis.tool-missing", Severity: finding.SevInfo,
+			Check: "lint", RuleID: "lintel.tool-missing", Severity: finding.SevInfo,
 			Message: err.Error(), Engine: tool,
 		}}, nil
 	}

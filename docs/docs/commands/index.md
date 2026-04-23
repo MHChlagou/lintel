@@ -1,19 +1,19 @@
 # CLI reference
 
-Aegis' command-line interface is deliberately small. Each command has a single purpose; combining them is usually done in a Git hook or a CI script, not by stringing multiple `aegis` invocations together.
+Lintel' command-line interface is deliberately small. Each command has a single purpose; combining them is usually done in a Git hook or a CI script, not by stringing multiple `lintel` invocations together.
 
 | Command          | Purpose                                                         |
 | ---------------- | --------------------------------------------------------------- |
-| [`init`](init.md)           | Create `.aegis/aegis.yaml` with secure defaults         |
-| [`install`](install.md)     | Install Git hooks that dispatch to `aegis run`          |
-| [`uninstall`](install.md#aegis-uninstall) | Remove Aegis-installed hooks              |
+| [`init`](init.md)           | Create `.lintel/lintel.yaml` with secure defaults         |
+| [`install`](install.md)     | Install Git hooks that dispatch to `lintel run`          |
+| [`uninstall`](install.md#lintel-uninstall) | Remove Lintel-installed hooks              |
 | [`run`](run.md)             | Run all enabled checks (honors `--hook` and `--check`)  |
 | [`doctor`](doctor.md)       | Verify scanner binaries, versions, and SHA256 hashes    |
-| [`baseline`](baseline.md)   | Snapshot current findings into `.aegis/baseline.json`   |
-| [`ignore`](ignore.md)       | Add a rule to `.aegis/allowlist.yaml`                   |
-| [`fmt`](run.md#fmt-shortcut) | Shortcut for `aegis run --check format`                 |
+| [`baseline`](baseline.md)   | Snapshot current findings into `.lintel/baseline.json`   |
+| [`ignore`](ignore.md)       | Add a rule to `.lintel/allowlist.yaml`                   |
+| [`fmt`](run.md#fmt-shortcut) | Shortcut for `lintel run --check format`                 |
 | [`explain`](explain.md)     | Print documentation pointer for a rule                  |
-| [`version`](version.md)     | Print `aegis` version and schema version                |
+| [`version`](version.md)     | Print `lintel` version and schema version                |
 
 ## Global flags
 
@@ -21,7 +21,7 @@ These flags are available on every command:
 
 | Flag              | Default                | Purpose                                       |
 | ----------------- | ---------------------- | --------------------------------------------- |
-| `--config`        | `.aegis/aegis.yaml`    | Path to the config file                       |
+| `--config`        | `.lintel/lintel.yaml`    | Path to the config file                       |
 | `--repo`          | `$PWD`                 | Repository root                               |
 | `--output`        | `pretty`               | Output format: `pretty`, `json`, `sarif`, `junit` |
 | `--no-color`      | auto                   | Disable ANSI colors                           |

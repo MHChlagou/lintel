@@ -1,6 +1,6 @@
 # Exit codes
 
-Aegis uses a small, stable set of exit codes. Shell scripts and CI jobs can branch on them.
+Lintel uses a small, stable set of exit codes. Shell scripts and CI jobs can branch on them.
 
 | Code | Name                        | Meaning                                                                 |
 | ---- | --------------------------- | ----------------------------------------------------------------------- |
@@ -10,12 +10,12 @@ Aegis uses a small, stable set of exit codes. Shell scripts and CI jobs can bran
 | `3`  | `binary_error`              | A scanner binary was missing, the wrong version, or had a wrong SHA256. |
 | `4`  | `scanner_error`             | A scanner crashed, hit its per-check timeout, or returned garbled output. |
 | `5`  | `override_denied`           | `--override` refused (missing reason, or `protect_secrets` blocks it).  |
-| `10` | `internal_error`            | Unexpected bug in Aegis. Please file an issue.                          |
+| `10` | `internal_error`            | Unexpected bug in Lintel. Please file an issue.                          |
 
 ## Using exit codes in a shell
 
 ```bash
-aegis run --output json > /tmp/report.json
+lintel run --output json > /tmp/report.json
 rc=$?
 case "$rc" in
   0) echo "clean" ;;

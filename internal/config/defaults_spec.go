@@ -1,6 +1,6 @@
 package config
 
-// DefaultSpecYAML is written by `aegis init`. Secure by default: block mode on
+// DefaultSpecYAML is written by `lintel init`. Secure by default: block mode on
 // secrets/malicious_code/dependencies; reason required; no-verify disallowed.
 const DefaultSpecYAML = `version: 1
 
@@ -55,7 +55,7 @@ checks:
       - "**/test/**"
       - "**/__tests__/**"
       - "**/fixtures/**"
-    inline_ignore: "aegis:ignore-secret"
+    inline_ignore: "lintel:ignore-secret"
   malicious_code:
     enabled: true
     engine: opengrep
@@ -123,10 +123,10 @@ output:
   verbosity: normal
 
 override:
-  env_var: AEGIS_SKIP
+  env_var: LINTEL_SKIP
   allow_no_verify: false
   require_reason: true
-  log_file: .aegis/overrides.log
+  log_file: .lintel/overrides.log
   protect_secrets: true
 
 performance:
@@ -135,13 +135,13 @@ performance:
   total_timeout_seconds: 300
   cache:
     enabled: true
-    path: ~/.aegis/cache
+    path: ~/.lintel/cache
     ttl_hours: 24
 
 strict_versions: true
 `
 
-const DefaultAllowlistYAML = `# .aegis/allowlist.yaml
+const DefaultAllowlistYAML = `# .lintel/allowlist.yaml
 # Every entry requires a reason. Expired entries are ignored.
 entries: []
 `

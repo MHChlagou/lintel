@@ -1,4 +1,4 @@
-# Aegis config for a single Go service.
+# Lintel config for a single Go service.
 # Pre-commit: fast local checks (format, lint, secrets).
 # Pre-push: dependencies and malicious-code SAST.
 

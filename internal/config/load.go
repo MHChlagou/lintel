@@ -9,13 +9,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const DefaultRelPath = ".aegis/aegis.yaml"
+const DefaultRelPath = ".lintel/lintel.yaml"
 
 // Load reads and parses the spec file. If path is empty, it resolves to
-// $AEGIS_CONFIG then <repoRoot>/.aegis/aegis.yaml.
+// $LINTEL_CONFIG then <repoRoot>/.lintel/lintel.yaml.
 func Load(repoRoot, path string) (*Spec, error) {
 	if path == "" {
-		if env := os.Getenv("AEGIS_CONFIG"); env != "" {
+		if env := os.Getenv("LINTEL_CONFIG"); env != "" {
 			path = env
 		} else {
 			path = filepath.Join(repoRoot, DefaultRelPath)
@@ -55,10 +55,10 @@ func ApplyDefaults(s *Spec) {
 		s.Output.Verbosity = "normal"
 	}
 	if s.Override.EnvVar == "" {
-		s.Override.EnvVar = "AEGIS_SKIP"
+		s.Override.EnvVar = "LINTEL_SKIP"
 	}
 	if s.Override.LogFile == "" {
-		s.Override.LogFile = ".aegis/overrides.log"
+		s.Override.LogFile = ".lintel/overrides.log"
 	}
 	if s.Performance.CheckTimeoutSeconds == 0 {
 		s.Performance.CheckTimeoutSeconds = 120
@@ -70,7 +70,7 @@ func ApplyDefaults(s *Spec) {
 		s.Performance.Parallel = "auto"
 	}
 	if s.Performance.Cache.Path == "" {
-		s.Performance.Cache.Path = "~/.aegis/cache"
+		s.Performance.Cache.Path = "~/.lintel/cache"
 	}
 	if s.Checks.Secrets.Engine == "" {
 		s.Checks.Secrets.Engine = "gitleaks"
@@ -79,7 +79,7 @@ func ApplyDefaults(s *Spec) {
 		s.Checks.Secrets.Mode = ModeBlock
 	}
 	if s.Checks.Secrets.InlineIgnore == "" {
-		s.Checks.Secrets.InlineIgnore = "aegis:ignore-secret"
+		s.Checks.Secrets.InlineIgnore = "lintel:ignore-secret"
 	}
 	if s.Checks.MaliciousCode.Engine == "" {
 		s.Checks.MaliciousCode.Engine = "opengrep"

@@ -35,4 +35,4 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/MHChlagou/aegis
+        - github.com/MHChlagou/lintel

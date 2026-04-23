@@ -8,18 +8,18 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/MHChlagou/aegis/internal/checker"
-	"github.com/MHChlagou/aegis/internal/config"
-	"github.com/MHChlagou/aegis/internal/detect"
-	"github.com/MHChlagou/aegis/internal/filter"
-	"github.com/MHChlagou/aegis/internal/finding"
-	"github.com/MHChlagou/aegis/internal/runner"
+	"github.com/MHChlagou/lintel/internal/checker"
+	"github.com/MHChlagou/lintel/internal/config"
+	"github.com/MHChlagou/lintel/internal/detect"
+	"github.com/MHChlagou/lintel/internal/filter"
+	"github.com/MHChlagou/lintel/internal/finding"
+	"github.com/MHChlagou/lintel/internal/runner"
 )
 
 func cmdBaseline() *cobra.Command {
 	return &cobra.Command{
 		Use:   "baseline",
-		Short: "Snapshot current findings into .aegis/baseline.json",
+		Short: "Snapshot current findings into .lintel/baseline.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			root := resolveRepoRoot()
 			spec, err := config.Load(root, flags.configPath)

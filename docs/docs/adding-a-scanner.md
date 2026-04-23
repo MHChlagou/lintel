@@ -51,7 +51,7 @@ func init() {
 }
 ```
 
-The registry is the single source of truth for "what scanners does Aegis know about."
+The registry is the single source of truth for "what scanners does Lintel know about."
 
 ## 4. Pin SHA256 hashes
 
@@ -112,4 +112,4 @@ This runs fmt, vet, lint, tests, and the build matrix.
 
 ## 9. Open the PR
 
-Follow the [PR template](https://github.com/MHChlagou/aegis/blob/main/.github/PULL_REQUEST_TEMPLATE.md). Expect a careful review from CODEOWNERS - especially of the hash pins and the normalize function.
+Follow the [PR template](https://github.com/MHChlagou/lintel/blob/main/.github/PULL_REQUEST_TEMPLATE.md). Expect a careful review from CODEOWNERS - especially of the hash pins and the normalize function.

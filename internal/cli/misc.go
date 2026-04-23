@@ -8,15 +8,15 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
-	"github.com/MHChlagou/aegis/internal/filter"
+	"github.com/MHChlagou/lintel/internal/filter"
 )
 
-// cmdIgnore adds a rule+path pair to .aegis/allowlist.yaml.
+// cmdIgnore adds a rule+path pair to .lintel/allowlist.yaml.
 func cmdIgnore() *cobra.Command {
 	var path, reason, expires string
 	c := &cobra.Command{
 		Use:   "ignore <rule>",
-		Short: "Add a rule to .aegis/allowlist.yaml",
+		Short: "Add a rule to .lintel/allowlist.yaml",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if reason == "" {
@@ -31,7 +31,7 @@ func cmdIgnore() *cobra.Command {
 				Rule: args[0], Path: path, Reason: reason, Expires: expires,
 			})
 			raw, _ := yaml.Marshal(al)
-			p := filepath.Join(root, ".aegis", "allowlist.yaml")
+			p := filepath.Join(root, ".lintel", "allowlist.yaml")
 			if err := os.WriteFile(p, raw, 0o644); err != nil {
 				return err
 			}
@@ -45,11 +45,11 @@ func cmdIgnore() *cobra.Command {
 	return c
 }
 
-// cmdFmt is a shortcut for `aegis run --check format`.
+// cmdFmt is a shortcut for `lintel run --check format`.
 func cmdFmt() *cobra.Command {
 	return &cobra.Command{
 		Use:   "fmt",
-		Short: "Shortcut for `aegis run --check format`",
+		Short: "Shortcut for `lintel run --check format`",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.Root().SetArgs([]string{"run", "--check", "format"})
 			return cmd.Root().Execute()

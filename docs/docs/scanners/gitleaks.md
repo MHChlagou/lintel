@@ -6,9 +6,9 @@
 
 ## What it does
 
-`gitleaks` scans files for high-entropy strings and known token shapes, reporting matches with a rule id and a short excerpt. Aegis uses it as the default `secrets` check.
+`gitleaks` scans files for high-entropy strings and known token shapes, reporting matches with a rule id and a short excerpt. Lintel uses it as the default `secrets` check.
 
-## How Aegis invokes it
+## How Lintel invokes it
 
 ```text
 gitleaks detect \
@@ -22,13 +22,13 @@ gitleaks detect \
   <staged files>
 ```
 
-- `--no-git`: Aegis has already identified the staged file set; we do not need gitleaks to re-scan history.
-- `--redact`: matched values are redacted in the output. Aegis never exposes the raw value.
+- `--no-git`: Lintel has already identified the staged file set; we do not need gitleaks to re-scan history.
+- `--redact`: matched values are redacted in the output. Lintel never exposes the raw value.
 - Staged paths are appended as positional args so only changed files are scanned.
 
 ## Severity mapping
 
-| Upstream        | Aegis severity |
+| Upstream        | Lintel severity |
 | --------------- | -------------- |
 | any match       | `error`        |
 
@@ -48,10 +48,10 @@ scanners:
 
 ## Custom rules
 
-Gitleaks supports a `.gitleaks.toml` rules file. Aegis does not manage this file; place it at the repo root and gitleaks will pick it up automatically.
+Gitleaks supports a `.gitleaks.toml` rules file. Lintel does not manage this file; place it at the repo root and gitleaks will pick it up automatically.
 
 !!! warning "Rule file authenticity"
-    Aegis verifies the gitleaks **binary** but not its rule pack. If you rely on a community rule pack, vendor it into your repo and review changes as you would any config.
+    Lintel verifies the gitleaks **binary** but not its rule pack. If you rely on a community rule pack, vendor it into your repo and review changes as you would any config.
 
 ## Common false positives
 

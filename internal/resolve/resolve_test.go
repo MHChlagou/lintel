@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/MHChlagou/aegis/internal/config"
+	"github.com/MHChlagou/lintel/internal/config"
 )
 
 // writeFakeBinary creates an executable file with known content and returns its path + hash.
@@ -82,7 +82,7 @@ func (s stubPins) LookupHash(scanner, version, platform string) string {
 }
 
 func TestResolve_PinFallback_Used(t *testing.T) {
-	// User's aegis.yaml has no sha256 for this platform. The resolver should
+	// User's lintel.yaml has no sha256 for this platform. The resolver should
 	// consult the pin fallback and verify against that.
 	dir := t.TempDir()
 	path, hash := writeFakeBinary(t, dir, "gitleaks")

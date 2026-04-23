@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MHChlagou/aegis/internal/finding"
-	"github.com/MHChlagou/aegis/internal/version"
+	"github.com/MHChlagou/lintel/internal/finding"
+	"github.com/MHChlagou/lintel/internal/version"
 )
 
 // ExitCodes mirror spec §11.5.
@@ -25,16 +25,16 @@ const (
 )
 
 type Summary struct {
-	Version      int      `json:"version"`
-	AegisVersion string   `json:"aegis_version"`
-	Repo         string   `json:"repo"`
-	Stacks       []string `json:"stacks"`
-	StartedAt    string   `json:"started_at"`
-	DurationMS   int      `json:"duration_ms"`
-	Hook         string   `json:"hook"`
+	Version       int      `json:"version"`
+	LintelVersion string   `json:"lintel_version"`
+	Repo          string   `json:"repo"`
+	Stacks        []string `json:"stacks"`
+	StartedAt     string   `json:"started_at"`
+	DurationMS    int      `json:"duration_ms"`
+	Hook          string   `json:"hook"`
 	// ChecksRun lists the checks that were actually executed in this run,
 	// in spec order. Checks that were filtered out (via --check, --hook, or
-	// AEGIS_SKIP) or disabled in config are intentionally absent.
+	// LINTEL_SKIP) or disabled in config are intentionally absent.
 	ChecksRun []string          `json:"checks_run"`
 	Summary   Counts            `json:"summary"`
 	Findings  []finding.Finding `json:"findings"`
@@ -47,15 +47,15 @@ type Counts struct {
 
 func NewSummary(repo, hook string, stacks, checksRun []string, start time.Time, findings []finding.Finding) Summary {
 	s := Summary{
-		Version:      1,
-		AegisVersion: version.Version,
-		Repo:         repo,
-		Stacks:       stacks,
-		StartedAt:    start.UTC().Format(time.RFC3339),
-		DurationMS:   int(time.Since(start) / time.Millisecond),
-		Hook:         hook,
-		ChecksRun:    orderedIntersect(checksRun),
-		Findings:     findings,
+		Version:       1,
+		LintelVersion: version.Version,
+		Repo:          repo,
+		Stacks:        stacks,
+		StartedAt:     start.UTC().Format(time.RFC3339),
+		DurationMS:    int(time.Since(start) / time.Millisecond),
+		Hook:          hook,
+		ChecksRun:     orderedIntersect(checksRun),
+		Findings:      findings,
 	}
 	for _, f := range findings {
 		s.Summary.Total++
@@ -82,7 +82,7 @@ func fpln(w io.Writer, args ...any)               { _, _ = fmt.Fprintln(w, args.
 func WritePretty(w io.Writer, s Summary, color bool, stagedFiles int) {
 	c := palette{enabled: color}
 	fpln(w, c.dim(strings.Repeat("─", 58)))
-	fpf(w, " Aegis %s - repo: %s  stacks: %s\n", version.Version, s.Repo, strings.Join(s.Stacks, ","))
+	fpf(w, " Lintel %s - repo: %s  stacks: %s\n", version.Version, s.Repo, strings.Join(s.Stacks, ","))
 	if s.Hook != "" {
 		fpf(w, " hook: %s   staged: %d files\n", s.Hook, stagedFiles)
 	}
@@ -143,7 +143,7 @@ func WritePretty(w io.Writer, s Summary, color bool, stagedFiles int) {
 	}
 	if s.Summary.Blocking > 0 {
 		fpf(w, "%s commit blocked - %d blocking finding(s)\n", c.red("✖"), s.Summary.Blocking)
-		fpln(w, "  bypass: AEGIS_SKIP=<checks> AEGIS_REASON=\"...\" git commit")
+		fpln(w, "  bypass: LINTEL_SKIP=<checks> LINTEL_REASON=\"...\" git commit")
 	} else {
 		fpf(w, "%s ok - %d non-blocking finding(s)\n", c.green("✓"), s.Summary.Total)
 	}

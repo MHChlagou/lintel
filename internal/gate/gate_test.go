@@ -3,9 +3,9 @@ package gate
 import (
 	"testing"
 
-	"github.com/MHChlagou/aegis/internal/config"
-	"github.com/MHChlagou/aegis/internal/filter"
-	"github.com/MHChlagou/aegis/internal/finding"
+	"github.com/MHChlagou/lintel/internal/config"
+	"github.com/MHChlagou/lintel/internal/filter"
+	"github.com/MHChlagou/lintel/internal/finding"
 )
 
 func baseSpec() *config.Spec {
@@ -17,7 +17,7 @@ func baseSpec() *config.Spec {
 					"**/*_test.go",
 					"**/fixtures/**",
 				},
-				InlineIgnore: "aegis:ignore-secret",
+				InlineIgnore: "lintel:ignore-secret",
 			},
 			MaliciousCode: config.MaliciousCodeCheck{
 				Mode:              config.ModeBlock,

@@ -2,7 +2,7 @@
 /dist/
 coverage.out
 *.test
-.aegis/overrides.log
+.lintel/overrides.log
 .DS_Store
 
 # Docs (MkDocs) build output

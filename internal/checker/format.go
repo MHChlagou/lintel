@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/MHChlagou/aegis/internal/detect"
-	"github.com/MHChlagou/aegis/internal/finding"
+	"github.com/MHChlagou/lintel/internal/detect"
+	"github.com/MHChlagou/lintel/internal/finding"
 )
 
 type Format struct{}
@@ -46,7 +46,7 @@ func runFormatter(ctx context.Context, in CheckInput, tool string, files []strin
 	if err != nil {
 		// Don't fail the commit just because a formatter is missing; surface as INFO.
 		return []finding.Finding{{
-			Check: "format", RuleID: "aegis.tool-missing", Severity: finding.SevInfo,
+			Check: "format", RuleID: "lintel.tool-missing", Severity: finding.SevInfo,
 			Message: err.Error(), Engine: tool,
 		}}, nil
 	}

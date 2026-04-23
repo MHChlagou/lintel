@@ -1,6 +1,6 @@
 # Release process
 
-Maintainer runbook for cutting a new Aegis release.
+Maintainer runbook for cutting a new Lintel release.
 
 ## Cadence
 
@@ -23,7 +23,7 @@ Maintainer runbook for cutting a new Aegis release.
 ```bash
 git checkout main
 git pull
-git tag -a v0.1.0 -m "Aegis 0.1.0"
+git tag -a v0.1.0 -m "Lintel 0.1.0"
 git push origin v0.1.0
 ```
 
@@ -45,16 +45,16 @@ Verify the workflow completed and all artifacts are attached before announcing.
 ```bash
 # Download and verify one platform as a sanity check.
 version=0.1.0
-curl -fsSLO "https://github.com/MHChlagou/aegis/releases/download/v${version}/aegis-linux-amd64"
-curl -fsSLO "https://github.com/MHChlagou/aegis/releases/download/v${version}/aegis-linux-amd64.sha256"
-sha256sum -c aegis-linux-amd64.sha256
+curl -fsSLO "https://github.com/MHChlagou/lintel/releases/download/v${version}/lintel-linux-amd64"
+curl -fsSLO "https://github.com/MHChlagou/lintel/releases/download/v${version}/lintel-linux-amd64.sha256"
+sha256sum -c lintel-linux-amd64.sha256
 
 # Sigstore verification (requires cosign v2.2+).
 cosign verify-blob \
-  --bundle aegis-linux-amd64.sigstore \
-  --certificate-identity-regexp 'https://github.com/MHChlagou/aegis/.github/workflows/release.yml@.*' \
+  --bundle lintel-linux-amd64.sigstore \
+  --certificate-identity-regexp 'https://github.com/MHChlagou/lintel/.github/workflows/release.yml@.*' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  aegis-linux-amd64
+  lintel-linux-amd64
 ```
 
 ### Publish
@@ -75,4 +75,4 @@ If a release needs to be pulled:
 
 ## Docs versioning
 
-Aegis uses [mike](https://github.com/jimporter/mike) for docs versioning. The `docs.yml` workflow calls `mike deploy --push <version> latest` on each tagged release. Users land on `/latest/` by default; `/<version>/` paths remain addressable forever.
+Lintel uses [mike](https://github.com/jimporter/mike) for docs versioning. The `docs.yml` workflow calls `mike deploy --push <version> latest` on each tagged release. Users land on `/latest/` by default; `/<version>/` paths remain addressable forever.

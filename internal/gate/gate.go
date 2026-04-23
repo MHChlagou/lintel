@@ -7,9 +7,9 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 
-	"github.com/MHChlagou/aegis/internal/config"
-	"github.com/MHChlagou/aegis/internal/filter"
-	"github.com/MHChlagou/aegis/internal/finding"
+	"github.com/MHChlagou/lintel/internal/config"
+	"github.com/MHChlagou/lintel/internal/filter"
+	"github.com/MHChlagou/lintel/internal/finding"
 )
 
 // Apply runs all filter layers in one pass and returns the mutated findings.
@@ -40,7 +40,7 @@ func Apply(spec *config.Spec, al *filter.Allowlist, base *filter.Baseline, repoR
 		if f.File != "" && f.Line > 0 && !demoted {
 			marker := spec.Checks.Secrets.InlineIgnore
 			if marker == "" {
-				marker = "aegis:ignore-secret"
+				marker = "lintel:ignore-secret"
 			}
 			if ok, missingReason, _ := filter.InlineIgnored(f.File, f.Line, marker, f.RuleID); ok && !missingReason {
 				continue

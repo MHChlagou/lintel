@@ -44,13 +44,13 @@ jobs:
           build_one() {
             local os="$1"; local arch="$2"; local ext=""
             if [ "${os}" = "windows" ]; then ext=".exe"; fi
-            local out="dist/aegis-${os}-${arch}${ext}"
+            local out="dist/lintel-${os}-${arch}${ext}"
             GOOS="${os}" GOARCH="${arch}" CGO_ENABLED=0 go build -trimpath \
               -ldflags "-s -w \
-                -X github.com/MHChlagou/aegis/internal/version.Version=${version} \
-                -X github.com/MHChlagou/aegis/internal/version.Commit=${commit} \
-                -X github.com/MHChlagou/aegis/internal/version.Date=${date}" \
-              -o "${out}" ./cmd/aegis
+                -X github.com/MHChlagou/lintel/internal/version.Version=${version} \
+                -X github.com/MHChlagou/lintel/internal/version.Commit=${commit} \
+                -X github.com/MHChlagou/lintel/internal/version.Date=${date}" \
+              -o "${out}" ./cmd/lintel
             sha256sum "${out}" | awk '{print $1}' > "${out}.sha256"
           }
           build_one linux amd64
@@ -95,7 +95,7 @@ jobs:
           # cosign v4 emits a single .sigstore bundle per artifact that carries
           # both the signature and the signing certificate. The old separate
           # .sig / .pem outputs are deprecated and ignored when --bundle is set.
-          for f in dist/aegis-*; do
+          for f in dist/lintel-*; do
             case "${f}" in
               *.sha256|*.sigstore) continue ;;
             esac

@@ -6,9 +6,9 @@
 
 ## What it does
 
-Ruff is a fast Python linter and formatter written in Rust. Aegis uses it for both `lint` and `format` on `python` stack files.
+Ruff is a fast Python linter and formatter written in Rust. Lintel uses it for both `lint` and `format` on `python` stack files.
 
-## How Aegis invokes it
+## How Lintel invokes it
 
 Lint:
 
@@ -24,12 +24,12 @@ ruff format --check <staged files>
 
 ## Severity mapping
 
-| Ruff severity | Aegis severity |
+| Ruff severity | Lintel severity |
 | ------------- | -------------- |
 | `error`       | `error`        |
 | `warning`     | `warn`         |
 
-Ruff does not emit a distinct `info` level; any rule classified as informational in your `pyproject.toml` becomes an Aegis `info`.
+Ruff does not emit a distinct `info` level; any rule classified as informational in your `pyproject.toml` becomes an Lintel `info`.
 
 ## Configuration
 
@@ -42,7 +42,7 @@ scanners:
       linux/amd64: "…"
 ```
 
-Rule selection lives in `pyproject.toml` under `[tool.ruff]` - Aegis does not intermediate.
+Rule selection lives in `pyproject.toml` under `[tool.ruff]` - Lintel does not intermediate.
 
 ## Common setup
 

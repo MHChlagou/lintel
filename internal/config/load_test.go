@@ -10,11 +10,11 @@ import (
 func writeTemp(t *testing.T, body string) string {
 	t.Helper()
 	dir := t.TempDir()
-	sub := filepath.Join(dir, ".aegis")
+	sub := filepath.Join(dir, ".lintel")
 	if err := os.MkdirAll(sub, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	p := filepath.Join(sub, "aegis.yaml")
+	p := filepath.Join(sub, "lintel.yaml")
 	if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}

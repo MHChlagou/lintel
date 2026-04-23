@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a defect in Aegis.
+description: Report a defect in Lintel.
 labels: ["bug", "triage"]
 body:
   - type: markdown
@@ -11,15 +11,15 @@ body:
 
         **Not for security issues.** If you believe you have found a security
         problem, please use
-        [GitHub Private Vulnerability Reporting](https://github.com/MHChlagou/aegis/security/advisories/new)
+        [GitHub Private Vulnerability Reporting](https://github.com/MHChlagou/lintel/security/advisories/new)
         instead.
 
   - type: input
     id: version
     attributes:
-      label: Aegis version
-      description: Output of `aegis version`.
-      placeholder: "aegis 0.1.0  schema=1  commit=abc123  built=2026-04-22"
+      label: Lintel version
+      description: Output of `lintel version`.
+      placeholder: "lintel 0.1.0  schema=1  commit=abc123  built=2026-04-22"
     validations:
       required: true
 
@@ -59,7 +59,7 @@ body:
       description: Minimal steps we can follow to reproduce. A tiny public repo helps a lot.
       placeholder: |
         1. `git init demo && cd demo`
-        2. `aegis init`
+        2. `lintel init`
         3. `…`
       render: bash
     validations:
@@ -68,7 +68,7 @@ body:
   - type: textarea
     id: config
     attributes:
-      label: Your `aegis.yaml` (redact anything sensitive)
+      label: Your `lintel.yaml` (redact anything sensitive)
       render: yaml
 
   - type: textarea

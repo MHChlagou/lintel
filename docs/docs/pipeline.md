@@ -1,6 +1,6 @@
 # The pipeline
 
-Every `aegis run` invocation executes the same nine stages in order. Understanding the pipeline makes configuration, debugging, and CI behavior much easier to predict.
+Every `lintel run` invocation executes the same nine stages in order. Understanding the pipeline makes configuration, debugging, and CI behavior much easier to predict.
 
 ```mermaid
 flowchart LR
@@ -14,11 +14,11 @@ flowchart LR
   S8 --> S9[9. Gate + report]
 ```
 
-Each stage is an explicit module under [`internal/`](https://github.com/MHChlagou/aegis/tree/main/internal) - you can read the code directly. The stages:
+Each stage is an explicit module under [`internal/`](https://github.com/MHChlagou/lintel/tree/main/internal) - you can read the code directly. The stages:
 
 ## 1. Load config
 
-Reads `.aegis/aegis.yaml`, merging with built-in defaults from [`internal/config/defaults_spec.go`](https://github.com/MHChlagou/aegis/blob/main/internal/config/defaults_spec.go). Env var overrides are applied last.
+Reads `.lintel/lintel.yaml`, merging with built-in defaults from [`internal/config/defaults_spec.go`](https://github.com/MHChlagou/lintel/blob/main/internal/config/defaults_spec.go). Env var overrides are applied last.
 
 Failure mode: **exit 2** (config error).
 
@@ -34,9 +34,9 @@ Determines which files are in scope.
 
 | Invocation                    | Scope                                         |
 | ----------------------------- | --------------------------------------------- |
-| `aegis run --hook pre-commit` | `git diff --cached --name-only`               |
-| `aegis run --hook pre-push`   | Commits about to be pushed, via `git rev-list` |
-| `aegis run` (no hook)         | Working tree modifications - everything unignored |
+| `lintel run --hook pre-commit` | `git diff --cached --name-only`               |
+| `lintel run --hook pre-push`   | Commits about to be pushed, via `git rev-list` |
+| `lintel run` (no hook)         | Working tree modifications - everything unignored |
 
 Files in `paths.exclude` globs are dropped here.
 
@@ -46,7 +46,7 @@ The file list is classified into stacks (`go`, `npm`, `python`, `shell`, …). S
 
 ## 5. Resolve and verify binaries
 
-For every enabled check, Aegis picks the right scanner based on stack, then:
+For every enabled check, Lintel picks the right scanner based on stack, then:
 
 1. Resolves its path (absolute or via `$PATH`).
 2. Runs the scanner's `--version` command.
@@ -55,7 +55,7 @@ For every enabled check, Aegis picks the right scanner based on stack, then:
 
 Failure mode: **exit 3** (binary missing, version mismatch, or hash mismatch). With `strict_versions: true` (default), any of these fail the whole run. With `strict_versions: false`, only the offending scanner is skipped with a warning.
 
-This is the stage that makes Aegis' supply-chain model meaningful - see [supply-chain](supply-chain.md).
+This is the stage that makes Lintel' supply-chain model meaningful - see [supply-chain](supply-chain.md).
 
 ## 6. Run scanners in parallel
 
@@ -89,7 +89,7 @@ The fingerprint is the bridge to baselines - it must be stable against cosmetic 
 
 ## 8. Filter
 
-Findings flow through a chain of filters (see [baseline-allowlist](baseline-allowlist.md#precedence)): `paths.exclude` → `allowlist` → `baseline` → inline `aegis:ignore` → `warn_paths`.
+Findings flow through a chain of filters (see [baseline-allowlist](baseline-allowlist.md#precedence)): `paths.exclude` → `allowlist` → `baseline` → inline `lintel:ignore` → `warn_paths`.
 
 Each filter keeps a record of what it dropped or downgraded; `--verbose` logs this for debugging.
 

@@ -11,15 +11,15 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/MHChlagou/aegis/internal/checker"
-	"github.com/MHChlagou/aegis/internal/config"
-	"github.com/MHChlagou/aegis/internal/detect"
-	"github.com/MHChlagou/aegis/internal/filter"
-	"github.com/MHChlagou/aegis/internal/finding"
-	"github.com/MHChlagou/aegis/internal/gate"
-	"github.com/MHChlagou/aegis/internal/report"
-	"github.com/MHChlagou/aegis/internal/resolve"
-	"github.com/MHChlagou/aegis/internal/runner"
+	"github.com/MHChlagou/lintel/internal/checker"
+	"github.com/MHChlagou/lintel/internal/config"
+	"github.com/MHChlagou/lintel/internal/detect"
+	"github.com/MHChlagou/lintel/internal/filter"
+	"github.com/MHChlagou/lintel/internal/finding"
+	"github.com/MHChlagou/lintel/internal/gate"
+	"github.com/MHChlagou/lintel/internal/report"
+	"github.com/MHChlagou/lintel/internal/resolve"
+	"github.com/MHChlagou/lintel/internal/runner"
 )
 
 func cmdRun() *cobra.Command {
@@ -176,9 +176,9 @@ func applySkips(checks []string, skips map[string]bool, spec *config.Spec, stder
 	if len(skips) == 0 {
 		return checks
 	}
-	reason := os.Getenv("AEGIS_REASON")
+	reason := os.Getenv("LINTEL_REASON")
 	if spec.Override.RequireReason && strings.TrimSpace(reason) == "" {
-		fpln(stderr, "✖ AEGIS_SKIP set but AEGIS_REASON is empty (override.require_reason=true)")
+		fpln(stderr, "✖ LINTEL_SKIP set but LINTEL_REASON is empty (override.require_reason=true)")
 		os.Exit(report.ExitConfig)
 	}
 	out := make([]string, 0, len(checks))
@@ -258,7 +258,7 @@ func isCheckEnabled(spec *config.Spec, name string) bool {
 }
 
 func shouldUseColor(cfg string, flagNoColor bool) bool {
-	if flagNoColor || os.Getenv("NO_COLOR") != "" || os.Getenv("AEGIS_NO_COLOR") != "" {
+	if flagNoColor || os.Getenv("NO_COLOR") != "" || os.Getenv("LINTEL_NO_COLOR") != "" {
 		return false
 	}
 	switch cfg {

@@ -1,6 +1,6 @@
 // Package installer downloads, verifies, and installs pinned scanner
-// binaries into ~/.aegis/bin. The pin database (scanners.yaml) is embedded
-// into the aegis binary so a release ships one signed artifact with
+// binaries into ~/.lintel/bin. The pin database (scanners.yaml) is embedded
+// into the lintel binary so a release ships one signed artifact with
 // everything needed to fetch its declared scanners.
 package installer
 

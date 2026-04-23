@@ -8,21 +8,21 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/MHChlagou/aegis/internal/config"
+	"github.com/MHChlagou/lintel/internal/config"
 )
 
 func cmdInit() *cobra.Command {
 	var force bool
 	c := &cobra.Command{
 		Use:   "init",
-		Short: "Create .aegis/aegis.yaml with secure defaults",
+		Short: "Create .lintel/lintel.yaml with secure defaults",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			root := resolveRepoRoot()
-			dir := filepath.Join(root, ".aegis")
+			dir := filepath.Join(root, ".lintel")
 			if err := os.MkdirAll(dir, 0o755); err != nil {
 				return err
 			}
-			target := filepath.Join(dir, "aegis.yaml")
+			target := filepath.Join(dir, "lintel.yaml")
 			if _, err := os.Stat(target); err == nil && !force {
 				return fmt.Errorf("%s already exists (use --force to overwrite)", target)
 			}
@@ -36,13 +36,13 @@ func cmdInit() *cobra.Command {
 				_ = os.WriteFile(allowlist, []byte(config.DefaultAllowlistYAML), 0o644)
 			}
 			// gitignore overrides.log if there's a .gitignore
-			appendLineIfMissing(filepath.Join(root, ".gitignore"), ".aegis/overrides.log")
+			appendLineIfMissing(filepath.Join(root, ".gitignore"), ".lintel/overrides.log")
 			fpf(cmd.OutOrStdout(), "✓ wrote %s\n", target)
-			fpln(cmd.OutOrStdout(), "  next: `aegis install` to wire up git hooks")
+			fpln(cmd.OutOrStdout(), "  next: `lintel install` to wire up git hooks")
 			return nil
 		},
 	}
-	c.Flags().BoolVar(&force, "force", false, "overwrite an existing aegis.yaml")
+	c.Flags().BoolVar(&force, "force", false, "overwrite an existing lintel.yaml")
 	return c
 }
 

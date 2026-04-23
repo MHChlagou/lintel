@@ -10,7 +10,7 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 )
 
-// Stacks identified by Aegis; kept as strings for flexibility with config.
+// Stacks identified by Lintel; kept as strings for flexibility with config.
 const (
 	Npm      = "npm"
 	Yarn     = "yarn"
@@ -61,7 +61,7 @@ func scanManifests(root string, excludeGlobs []string) ([]string, error) {
 		rel = filepath.ToSlash(rel)
 		if d.IsDir() {
 			base := d.Name()
-			if base == ".git" || base == "node_modules" || base == "vendor" || base == "dist" || base == "build" || base == ".aegis" {
+			if base == ".git" || base == "node_modules" || base == "vendor" || base == "dist" || base == "build" || base == ".lintel" {
 				return filepath.SkipDir
 			}
 			if matchAny(rel, excludeGlobs) {

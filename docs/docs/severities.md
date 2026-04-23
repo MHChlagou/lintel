@@ -1,6 +1,6 @@
 # Severities and gates
 
-Aegis normalizes every finding to one of three severities:
+Lintel normalizes every finding to one of three severities:
 
 | Severity | Meaning                                                          |
 | -------- | ---------------------------------------------------------------- |
@@ -8,7 +8,7 @@ Aegis normalizes every finding to one of three severities:
 | `warn`   | Should be fixed. Default gate allows a small backlog.            |
 | `info`   | Informational. Never fails the gate by default.                  |
 
-Scanners often emit richer severity scales (`critical`, `high`, `medium`, `low`, `style`, `performance`). Each adapter maps these down to the three Aegis severities - see the individual [scanner pages](scanners/index.md) for the exact mapping.
+Scanners often emit richer severity scales (`critical`, `high`, `medium`, `low`, `style`, `performance`). Each adapter maps these down to the three Lintel severities - see the individual [scanner pages](scanners/index.md) for the exact mapping.
 
 ## Overriding severity
 
@@ -64,16 +64,16 @@ The gate evaluates top-down: if the `error` threshold is exceeded, the gate fail
 Single-line and block-level ignores can be embedded in code with magic comments:
 
 ```go
-// aegis:ignore rule=G101 reason="hardcoded for test fixture"
+// lintel:ignore rule=G101 reason="hardcoded for test fixture"
 var testPassword = "hunter2"
 ```
 
 ```python
-# aegis:ignore scanner=bandit rule=B105 reason="placeholder, see issue #42"
+# lintel:ignore scanner=bandit rule=B105 reason="placeholder, see issue #42"
 PASSWORD = "x"
 ```
 
-An inline ignore **must** include a `reason`; Aegis refuses the directive without it. This is part of the [override model](operations-override.md) - every suppression leaves an audit trail.
+An inline ignore **must** include a `reason`; Lintel refuses the directive without it. This is part of the [override model](operations-override.md) - every suppression leaves an audit trail.
 
 ## Quick reference
 
@@ -83,5 +83,5 @@ An inline ignore **must** include a `reason`; Aegis refuses the directive withou
 | "This directory is low-risk; warn only."         | `paths.warn_paths`                |
 | "We will fix these later but not block commits." | [`baseline`](baseline-allowlist.md#baseline) |
 | "This specific finding is a false positive."     | [`allowlist`](baseline-allowlist.md#allowlist) |
-| "Just this one line."                            | Inline `aegis:ignore` comment     |
+| "Just this one line."                            | Inline `lintel:ignore` comment     |
 | "Never allow anyone to disable secrets check."   | `protect_secrets: true` (default) |

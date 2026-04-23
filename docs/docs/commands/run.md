@@ -1,11 +1,11 @@
-# `aegis run`
+# `lintel run`
 
 The main command. Executes the [nine-stage pipeline](../pipeline.md) and emits a report.
 
 ## Usage
 
 ```bash
-aegis run [flags]
+lintel run [flags]
 ```
 
 ## Flags
@@ -30,22 +30,22 @@ Global flags (`--config`, `--repo`, `--verbose`, …) also apply. See the [CLI i
 ## Restricting checks
 
 ```bash
-aegis run --check lint,format          # run only lint and format
-aegis run --check secrets              # secrets only - useful for targeted debugging
+lintel run --check lint,format          # run only lint and format
+lintel run --check secrets              # secrets only - useful for targeted debugging
 ```
 
 ## `fmt` shortcut
 
 ```bash
-aegis fmt      # equivalent to: aegis run --check format
+lintel fmt      # equivalent to: lintel run --check format
 ```
 
-Because formatters are the fastest check, `aegis fmt` is a useful quick sanity pass.
+Because formatters are the fastest check, `lintel fmt` is a useful quick sanity pass.
 
 ## Dry-run
 
 ```bash
-aegis run --dry-run
+lintel run --dry-run
 ```
 
 Prints the fully merged config, the detected stacks, the staged file list, and the scanners that **would** run, then exits. Useful for debugging config precedence or CI environments.
@@ -54,16 +54,16 @@ Prints the fully merged config, the detected stacks, the staged file list, and t
 
 ```bash
 # Standard local run.
-aegis run
+lintel run
 
 # CI run with JSON output for downstream tools.
-aegis run --output json | tee aegis-report.json
+lintel run --output json | tee lintel-report.json
 
 # Scope to secrets + dependencies.
-aegis run --check secrets,dependencies
+lintel run --check secrets,dependencies
 
 # Emergency commit with an override + mandatory reason.
-aegis run --override --reason "rotating creds, ticket SEC-1234"
+lintel run --override --reason "rotating creds, ticket SEC-1234"
 ```
 
 ## Exit codes

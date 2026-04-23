@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/MHChlagou/aegis/internal/finding"
+	"github.com/MHChlagou/lintel/internal/finding"
 )
 
 func TestAllowEntryMatches(t *testing.T) {
@@ -44,8 +44,8 @@ func TestBaselineRoundtrip(t *testing.T) {
 	if err := SaveBaseline(root, fs, "2026-04-21T00:00:00Z"); err != nil {
 		t.Fatal(err)
 	}
-	// confirm file is created under .aegis
-	if _, err := os.Stat(filepath.Join(root, ".aegis", "baseline.json")); err != nil {
+	// confirm file is created under .lintel
+	if _, err := os.Stat(filepath.Join(root, ".lintel", "baseline.json")); err != nil {
 		t.Fatal(err)
 	}
 	loaded, err := LoadBaseline(root)
@@ -68,13 +68,13 @@ func TestInlineIgnored(t *testing.T) {
 	path := filepath.Join(dir, "a.go")
 	body := `package main
 
-// aegis:ignore-secret  reason="test fixture"
+// lintel:ignore-secret  reason="test fixture"
 var k = "AKIAEXAMPLEEXAMPLE"
 `
 	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	ok, missingReason, err := InlineIgnored(path, 4, "aegis:ignore-secret", "aws-key")
+	ok, missingReason, err := InlineIgnored(path, 4, "lintel:ignore-secret", "aws-key")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,13 +88,13 @@ func TestInlineIgnoredMissingReason(t *testing.T) {
 	path := filepath.Join(dir, "a.go")
 	body := `package main
 
-// aegis:ignore-secret
+// lintel:ignore-secret
 var k = "AKIAEXAMPLEEXAMPLE"
 `
 	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	ok, missingReason, err := InlineIgnored(path, 4, "aegis:ignore-secret", "aws-key")
+	ok, missingReason, err := InlineIgnored(path, 4, "lintel:ignore-secret", "aws-key")
 	if err != nil {
 		t.Fatal(err)
 	}

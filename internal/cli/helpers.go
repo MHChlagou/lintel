@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MHChlagou/aegis/internal/config"
-	"github.com/MHChlagou/aegis/internal/installer"
-	"github.com/MHChlagou/aegis/internal/resolve"
+	"github.com/MHChlagou/lintel/internal/config"
+	"github.com/MHChlagou/lintel/internal/installer"
+	"github.com/MHChlagou/lintel/internal/resolve"
 )
 
 // Writer errors on stdout/stderr are non-actionable, so these helpers swallow
@@ -18,7 +18,7 @@ func fpln(w io.Writer, args ...any)               { _, _ = fmt.Fprintln(w, args.
 
 // newResolverWithPinFallback builds a resolver and wires the embedded pin
 // DB as a fallback so user yaml files without sha256 entries still hit
-// verified hashes for scanners shipped with aegis. A failed Load here is
+// verified hashes for scanners shipped with lintel. A failed Load here is
 // non-fatal — we keep a resolver without fallback and let the normal
 // missing-hash path handle it — because the embedded pin DB is a
 // correctness enhancement, not a precondition for running.

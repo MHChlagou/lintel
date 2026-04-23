@@ -8,7 +8,7 @@
 
 `osv-scanner` queries the [OSV](https://osv.dev) database for known-vulnerable versions of packages listed in a lockfile. It is the default `dependencies` check.
 
-## How Aegis invokes it
+## How Lintel invokes it
 
 ```text
 osv-scanner \
@@ -17,7 +17,7 @@ osv-scanner \
   --no-resolve
 ```
 
-Aegis picks the lockfile automatically based on stack:
+Lintel picks the lockfile automatically based on stack:
 
 | Stack    | Lockfile                                       |
 | -------- | ---------------------------------------------- |
@@ -29,7 +29,7 @@ If multiple lockfiles exist, osv-scanner is invoked once per lockfile.
 
 ## Severity mapping
 
-| OSV severity score (CVSS 3) | Aegis severity |
+| OSV severity score (CVSS 3) | Lintel severity |
 | --------------------------- | -------------- |
 | ≥ 9.0 (Critical)            | `error`        |
 | 7.0–8.9 (High)              | `error`        |
@@ -62,4 +62,4 @@ hooks:
 
 ## Offline mode
 
-Pass `--offline` (osv-scanner 1.9+) to use an embedded database. Aegis will pass this through when `scanners.osv-scanner.offline: true` is set in `aegis.yaml`.
+Pass `--offline` (osv-scanner 1.9+) to use an embedded database. Lintel will pass this through when `scanners.osv-scanner.offline: true` is set in `lintel.yaml`.

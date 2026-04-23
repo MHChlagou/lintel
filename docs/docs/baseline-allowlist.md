@@ -1,12 +1,12 @@
 # Baseline and allowlist
 
-When you adopt Aegis on an existing codebase, you usually have findings from day zero that you don't want to fix immediately but don't want to block commits either. Aegis gives you three layered tools for this, in increasing specificity.
+When you adopt Lintel on an existing codebase, you usually have findings from day zero that you don't want to fix immediately but don't want to block commits either. Lintel gives you three layered tools for this, in increasing specificity.
 
 | Tool            | Scope                              | File                             | Audit trail |
 | --------------- | ---------------------------------- | -------------------------------- | ----------- |
-| `paths.exclude` | Whole paths, never scanned         | `aegis.yaml`                     | YAML diff   |
-| Allowlist       | Specific rule-on-path, suppressed  | `.aegis/allowlist.yaml`          | YAML diff + required reason |
-| Baseline        | Accept everything currently found  | `.aegis/baseline.json`           | JSON diff   |
+| `paths.exclude` | Whole paths, never scanned         | `lintel.yaml`                     | YAML diff   |
+| Allowlist       | Specific rule-on-path, suppressed  | `.lintel/allowlist.yaml`          | YAML diff + required reason |
+| Baseline        | Accept everything currently found  | `.lintel/baseline.json`           | JSON diff   |
 | Inline ignore   | One line or block                  | In the source file               | Required reason in comment |
 
 Pick the least-broad tool for the job.
@@ -16,7 +16,7 @@ Pick the least-broad tool for the job.
 An allowlist entry permanently suppresses a (scanner, rule, optional file pattern) tuple. Every entry requires a `reason` string - reviewers can verify the judgment.
 
 ```yaml
-# .aegis/allowlist.yaml
+# .lintel/allowlist.yaml
 version: 1
 entries:
   - scanner: gitleaks
@@ -32,24 +32,24 @@ entries:
 Managing from the CLI:
 
 ```bash
-aegis ignore add --scanner gitleaks --rule generic-api-key \
+lintel ignore add --scanner gitleaks --rule generic-api-key \
   --files 'testdata/**' --reason "Test fixtures"
 ```
 
-`aegis ignore` refuses to add an entry without a reason.
+`lintel ignore` refuses to add an entry without a reason.
 
 ## Baseline
 
 The baseline is a snapshot of every finding at a point in time. Anything in the baseline is treated as known and is excluded from the gate. Anything **new** fails the commit as usual.
 
 ```bash
-aegis baseline            # snapshot current findings into .aegis/baseline.json
-aegis baseline --check    # fail if the baseline is stale compared to current findings
+lintel baseline            # snapshot current findings into .lintel/baseline.json
+lintel baseline --check    # fail if the baseline is stale compared to current findings
 ```
 
 The file is JSON - check it in alongside your code. A finding is considered "the same" across runs via its stable fingerprint (see [first scan](first-scan.md#anatomy-of-a-pretty-report)), so cosmetic code moves (renaming a function, shifting lines) still match as long as the (scanner, rule, file, normalized-message) tuple is preserved.
 
-When you fix a finding, re-run `aegis baseline` to shrink the snapshot. CI should run `aegis baseline --check` on pull requests so a PR that fixes a finding doesn't accidentally let the same finding slip back in via the baseline.
+When you fix a finding, re-run `lintel baseline` to shrink the snapshot. CI should run `lintel baseline --check` on pull requests so a PR that fixes a finding doesn't accidentally let the same finding slip back in via the baseline.
 
 ### Baseline vs. allowlist
 

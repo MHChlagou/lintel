@@ -24,7 +24,7 @@ type AllowEntry struct {
 }
 
 func LoadAllowlist(repoRoot string) (*Allowlist, error) {
-	path := filepath.Join(repoRoot, ".aegis", "allowlist.yaml")
+	path := filepath.Join(repoRoot, ".lintel", "allowlist.yaml")
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {

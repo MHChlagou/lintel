@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/MHChlagou/aegis/internal/config"
-	"github.com/MHChlagou/aegis/internal/hook"
-	"github.com/MHChlagou/aegis/internal/installer"
+	"github.com/MHChlagou/lintel/internal/config"
+	"github.com/MHChlagou/lintel/internal/hook"
+	"github.com/MHChlagou/lintel/internal/installer"
 )
 
 func cmdInstall() *cobra.Command {
@@ -17,12 +17,12 @@ func cmdInstall() *cobra.Command {
 	var all bool
 	c := &cobra.Command{
 		Use:   "install [scanner]",
-		Short: "Install git hooks, or fetch a pinned scanner into ~/.aegis/bin",
-		Long: `Without arguments, installs aegis-managed git hooks into .git/hooks.
-With a scanner name (e.g. 'aegis install gitleaks'), downloads the pinned
+		Short: "Install git hooks, or fetch a pinned scanner into ~/.lintel/bin",
+		Long: `Without arguments, installs lintel-managed git hooks into .git/hooks.
+With a scanner name (e.g. 'lintel install gitleaks'), downloads the pinned
 release from the embedded pin database, verifies its sha256, and places
-the verified binary at ~/.aegis/bin/<scanner>. Use --all to install every
-scanner declared in the loaded aegis.yaml (skipping gofmt, which ships
+the verified binary at ~/.lintel/bin/<scanner>. Use --all to install every
+scanner declared in the loaded lintel.yaml (skipping gofmt, which ships
 with the Go toolchain).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			out := cmd.OutOrStdout()
@@ -38,8 +38,8 @@ with the Go toolchain).`,
 			}
 		},
 	}
-	c.Flags().BoolVar(&force, "force", false, "overwrite pre-existing non-aegis hooks")
-	c.Flags().BoolVar(&all, "all", false, "install every scanner declared in aegis.yaml")
+	c.Flags().BoolVar(&force, "force", false, "overwrite pre-existing non-lintel hooks")
+	c.Flags().BoolVar(&all, "all", false, "install every scanner declared in lintel.yaml")
 	return c
 }
 
@@ -52,7 +52,7 @@ func installHooks(out io.Writer, force bool) error {
 		fpf(out, "✓ installed hook: %s\n", n)
 	}
 	for _, n := range skipped {
-		fpf(out, "! skipped: existing non-aegis hook %s (use --force to overwrite)\n", n)
+		fpf(out, "! skipped: existing non-lintel hook %s (use --force to overwrite)\n", n)
 	}
 	return nil
 }
@@ -64,10 +64,10 @@ func installOneScanner(cmd *cobra.Command, out io.Writer, name string) error {
 	}
 	bin, ok := spec.Binaries[name]
 	if !ok {
-		return fmt.Errorf("scanner %q is not declared in aegis.yaml (declared: %v)", name, sortedKeys(spec.Binaries))
+		return fmt.Errorf("scanner %q is not declared in lintel.yaml (declared: %v)", name, sortedKeys(spec.Binaries))
 	}
 	if name == "gofmt" {
-		return fmt.Errorf("gofmt ships with the Go toolchain; install Go instead of running `aegis install gofmt`")
+		return fmt.Errorf("gofmt ships with the Go toolchain; install Go instead of running `lintel install gofmt`")
 	}
 	reg, err := installer.Load()
 	if err != nil {
@@ -134,7 +134,7 @@ func sortedKeys(m map[string]config.Binary) []string {
 func cmdUninstall() *cobra.Command {
 	return &cobra.Command{
 		Use:   "uninstall",
-		Short: "Remove aegis-installed git hooks (foreign hooks are preserved)",
+		Short: "Remove lintel-installed git hooks (foreign hooks are preserved)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			removed, err := hook.Uninstall(resolveRepoRoot())
 			if err != nil {

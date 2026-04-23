@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/MHChlagou/aegis/internal/finding"
+	"github.com/MHChlagou/lintel/internal/finding"
 )
 
 type Baseline struct {
@@ -25,7 +25,7 @@ type BaselineFinding struct {
 }
 
 func baselinePath(repoRoot string) string {
-	return filepath.Join(repoRoot, ".aegis", "baseline.json")
+	return filepath.Join(repoRoot, ".lintel", "baseline.json")
 }
 
 func LoadBaseline(repoRoot string) (*Baseline, error) {
@@ -48,7 +48,7 @@ func LoadBaseline(repoRoot string) (*Baseline, error) {
 }
 
 func SaveBaseline(repoRoot string, findings []finding.Finding, now string) error {
-	dir := filepath.Join(repoRoot, ".aegis")
+	dir := filepath.Join(repoRoot, ".lintel")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}

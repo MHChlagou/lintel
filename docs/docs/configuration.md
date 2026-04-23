@@ -1,6 +1,6 @@
-# The `aegis.yaml` file
+# The `lintel.yaml` file
 
-Everything Aegis does is controlled by one file at `.aegis/aegis.yaml`. This page is a reference; for the rationale behind each field see the [full spec](reference/spec.md).
+Everything Lintel does is controlled by one file at `.lintel/lintel.yaml`. This page is a reference; for the rationale behind each field see the [full spec](reference/spec.md).
 
 ## Minimal example
 
@@ -28,7 +28,7 @@ gate:
     warn: 10
 ```
 
-That is enough to run. Every other field has a sensible default - see [`defaults_spec.go`](https://github.com/MHChlagou/aegis/blob/main/internal/config/defaults_spec.go) for the full baked-in defaults.
+That is enough to run. Every other field has a sensible default - see [`defaults_spec.go`](https://github.com/MHChlagou/lintel/blob/main/internal/config/defaults_spec.go) for the full baked-in defaults.
 
 ## Top-level sections
 
@@ -45,7 +45,7 @@ That is enough to run. Every other field has a sensible default - see [`defaults
 | `concurrency`     | Parallelism settings (see [performance](performance.md)).           |
 | `strict_versions` | If `true` (default), scanner version + SHA256 mismatches are fatal. |
 | `protect_secrets` | If `true` (default), the secrets check cannot be disabled by hook bypass. |
-| `hooks`           | Which Git hooks Aegis installs and what they dispatch to.           |
+| `hooks`           | Which Git hooks Lintel installs and what they dispatch to.           |
 
 ## Stacks
 
@@ -97,7 +97,7 @@ scanners:
 ```
 
 !!! warning "Hash discipline"
-    A scanner with a missing or mismatched `sha256` pin will be refused at runtime when `strict_versions: true`. This is the default and the whole point of the [supply-chain model](supply-chain.md). Do not turn it off to silence a hash error - update the pin via `aegis doctor --update-pins` (v1.1) or by hand from the upstream release checksum.
+    A scanner with a missing or mismatched `sha256` pin will be refused at runtime when `strict_versions: true`. This is the default and the whole point of the [supply-chain model](supply-chain.md). Do not turn it off to silence a hash error - update the pin via `lintel doctor --update-pins` (v1.1) or by hand from the upstream release checksum.
 
 ## Gates
 
@@ -133,7 +133,7 @@ Any config value can be overridden by an environment variable at runtime - usefu
 ## Validating a config
 
 ```bash
-aegis run --dry-run
+lintel run --dry-run
 # parses, validates, and prints the merged effective config
 ```
 

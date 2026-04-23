@@ -1,4 +1,4 @@
-module github.com/MHChlagou/aegis
+module github.com/MHChlagou/lintel
 
 go 1.25
 
