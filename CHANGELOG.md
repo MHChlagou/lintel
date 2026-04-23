@@ -16,12 +16,12 @@ produced "no sha256 for platform" errors.
 
 ### Added
 
-- `lintel install <scanner>` — downloads the pinned upstream release,
+- `lintel install <scanner>` - downloads the pinned upstream release,
   verifies its SHA256 on the wire, extracts the binary, re-verifies it
   on disk, and places it at `~/.lintel/bin/<name>`.
-- `lintel install --all` — installs every scanner declared in the
+- `lintel install --all` - installs every scanner declared in the
   loaded `lintel.yaml`. Skips `gofmt` (ships with the Go toolchain).
-- `lintel upgrade` — checks the GitHub Releases API for a newer lintel
+- `lintel upgrade` - checks the GitHub Releases API for a newer lintel
   version and prints the release notes plus a copy-paste upgrade
   command for your OS and architecture. The command never replaces
   the installed binary; self-updating verifiers are a larger trust
@@ -45,7 +45,7 @@ produced "no sha256 for platform" errors.
 - Resolver pin fallback: when the user's `lintel.yaml` has no
   `sha256` for a scanner/platform, the resolver consults the embedded
   pin database instead of refusing outright. Any explicit user pin
-  still wins — the fallback is strictly additive.
+  still wins - the fallback is strictly additive.
 - HTTPS host allowlist for installs. GitHub release infrastructure
   plus the two vendor CDNs currently in use (`astral.sh`, `biomejs.dev`)
   are trusted; non-HTTPS and off-list hosts are refused before any
