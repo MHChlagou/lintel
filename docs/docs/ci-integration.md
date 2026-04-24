@@ -4,16 +4,20 @@ Lintel is the same binary on a developer's laptop and in CI. Running it in CI ca
 
 ## GitHub Actions
 
-A minimal job that installs Lintel, restores the configured scanners, and runs `lintel run` on every pull request:
+### Recommended: the `lintel-action`
+
+The [**`MHChlagou/lintel-action`**](https://github.com/MHChlagou/lintel-action) composite action installs lintel, fetches the scanner binaries declared in your `lintel.yaml`, runs the gate, and writes SARIF ready to hand off to GitHub Advanced Security.
 
 ```yaml
-name: Lintel
-
+name: security
 on:
   pull_request:
+  push:
+    branches: [main]
 
 permissions:
   contents: read
+  security-events: write   # required for upload-sarif
 
 jobs:
   lintel:
@@ -21,37 +25,69 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0        # lintel needs history for pre-push-style scans
+          fetch-depth: 0         # pre-push hook scans history
+
+      - uses: MHChlagou/lintel-action@v1
+        with:
+          version: v0.2.4        # pin a lintel release for reproducible CI
+
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()             # always upload, even when lintel blocked
+        with:
+          sarif_file: lintel.sarif
+```
+
+Findings then appear as **inline annotations on the PR** and in **Security → Code scanning**. The action caches scanner binaries in `~/.lintel/bin` keyed on lintel version + `lintel.yaml` hash, so only the first run pays the download cost.
+
+Useful inputs:
+
+| Input | Default | Purpose |
+| --- | --- | --- |
+| `version` | `latest` | Lintel release tag. Pin a version for reproducible CI. |
+| `hook` | `pre-push` | `pre-commit` \| `pre-push` \| `commit-msg` |
+| `output` | `sarif` | `pretty` \| `json` \| `sarif` |
+| `fail-on-findings` | `true` | Set `false` to only annotate, never fail the job |
+
+Full input / output reference: [the action's README](https://github.com/MHChlagou/lintel-action#inputs).
+
+### Alternative: install the CLI by hand
+
+If you'd rather not depend on a third-party action, the install script works in CI exactly the same way it works on your laptop:
+
+```yaml
+name: Lintel
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  lintel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
       - name: Install lintel
         run: |
-          version="0.1.0"
-          curl -fsSL "https://github.com/MHChlagou/lintel/releases/download/v${version}/lintel-linux-amd64" -o /usr/local/bin/lintel
-          curl -fsSL "https://github.com/MHChlagou/lintel/releases/download/v${version}/lintel-linux-amd64.sha256" -o /tmp/lintel.sha256
-          ( cd /usr/local/bin && sha256sum -c /tmp/lintel.sha256 )
-          chmod +x /usr/local/bin/lintel
+          curl -fsSL https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.sh \
+            | sh -s -- --version v0.2.4
 
-      - name: Install scanners
-        # Install only the ones your lintel.yaml references.
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.61.0
-          # ... add gitleaks, osv-scanner, etc.
-
-      - name: Verify scanner hashes
-        run: lintel doctor
+      - name: Install scanners from lintel.yaml
+        run: lintel install --all
 
       - name: Run lintel
-        run: lintel run --output json | tee lintel-report.json
+        run: lintel run --hook pre-push --output sarif > lintel.sarif
 
-      - name: Upload report
+      - uses: github/codeql-action/upload-sarif@v3
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: lintel-report
-          path: lintel-report.json
+          sarif_file: lintel.sarif
 ```
 
-Pin your release version and verify its checksum - do not `curl | sh` without verification. Once SARIF output lands (v1.1), you can upload findings to GitHub Code Scanning directly.
+The install script verifies the SHA256 against the release sidecar and, when `cosign` is on `PATH`, the Sigstore bundle. Pin a version (`--version vX.Y.Z`) for reproducible CI; `latest` is fine for experimentation.
 
 ## GitLab CI
 
@@ -61,7 +97,7 @@ lintel:
   stage: test
   before_script:
     - apk add --no-cache curl git
-    - curl -fsSL https://github.com/MHChlagou/lintel/releases/download/v0.1.0/lintel-linux-amd64 -o /usr/local/bin/lintel
+    - curl -fsSL https://github.com/MHChlagou/lintel/releases/download/v0.2.4/lintel-linux-amd64 -o /usr/local/bin/lintel
     - chmod +x /usr/local/bin/lintel
   script:
     - lintel doctor
@@ -85,7 +121,7 @@ jobs:
       - run:
           name: Install lintel
           command: |
-            curl -fsSL https://github.com/MHChlagou/lintel/releases/download/v0.1.0/lintel-linux-amd64 -o ~/bin/lintel
+            curl -fsSL https://github.com/MHChlagou/lintel/releases/download/v0.2.4/lintel-linux-amd64 -o ~/bin/lintel
             chmod +x ~/bin/lintel
       - run: lintel doctor
       - run: lintel run --output json | tee lintel-report.json
