@@ -1,6 +1,12 @@
 package checker
 
-import "testing"
+import (
+	"context"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"testing"
+)
 
 func TestShouldFlagAssignment(t *testing.T) {
 	cases := []struct {
@@ -175,5 +181,73 @@ func TestScanConfigLines_JSONConfig(t *testing.T) {
 	got := scanConfigLines("config.json", "json", content)
 	if len(got) != 2 {
 		t.Fatalf("want 2 findings, got %d: %+v", len(got), got)
+	}
+}
+
+// initRepoWithDockerfile builds a throwaway git repo containing a Dockerfile
+// with a known secret, committed to HEAD. Returns the repo root.
+func initRepoWithDockerfile(t *testing.T, dockerfileBody string) string {
+	t.Helper()
+	dir := t.TempDir()
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("%v: %v\n%s", args, err, out)
+		}
+	}
+	run("git", "init", "-q")
+	run("git", "config", "user.email", "test@example.com")
+	run("git", "config", "user.name", "test")
+	if err := os.WriteFile(filepath.Join(dir, "Dockerfile"), []byte(dockerfileBody), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	run("git", "add", "Dockerfile")
+	run("git", "commit", "-q", "-m", "initial")
+	return dir
+}
+
+// TestScanConfigSecrets_PrePushFallback locks in the regression we discovered
+// in CI: pre-push runs have an empty StagedFiles slice (nothing is staged
+// when you push), so the scanner must fall back to the full HEAD tree or it
+// silently reports no findings — exactly the silent-fail mode this whole
+// scanner exists to prevent.
+func TestScanConfigSecrets_PrePushFallback(t *testing.T) {
+	root := initRepoWithDockerfile(t, "FROM node:20\nENV pass=Admin124\nCMD [\"node\"]\n")
+	got, err := scanConfigSecrets(context.Background(), CheckInput{
+		RepoRoot:    root,
+		StagedFiles: nil, // pre-push: nothing staged
+		Hook:        "pre-push",
+	})
+	if err != nil {
+		t.Fatalf("scanConfigSecrets: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("want 1 finding from full-tree fallback, got %d: %+v", len(got), got)
+	}
+	if got[0].RuleID != "lintel.config-secret.pass" {
+		t.Errorf("rule id: %+v", got[0])
+	}
+	if got[0].File != "Dockerfile" {
+		t.Errorf("file: got %q, want Dockerfile", got[0].File)
+	}
+}
+
+// TestScanConfigSecrets_PreCommitUsesStaged confirms we did not break the
+// pre-commit path. Files committed to HEAD but not present in StagedFiles
+// must be skipped, since pre-commit's contract is "scan the staged diff."
+func TestScanConfigSecrets_PreCommitUsesStaged(t *testing.T) {
+	root := initRepoWithDockerfile(t, "FROM node:20\nENV pass=Admin124\nCMD [\"node\"]\n")
+	got, err := scanConfigSecrets(context.Background(), CheckInput{
+		RepoRoot:    root,
+		StagedFiles: nil, // pre-commit with nothing staged
+		Hook:        "pre-commit",
+	})
+	if err != nil {
+		t.Fatalf("scanConfigSecrets: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("pre-commit must NOT scan committed-but-unstaged files, got %d findings", len(got))
 	}
 }

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-04-24
+
+Fixes a silent-fail in the config-secret scanner shipped in 0.2.1: in
+pre-push and CI contexts (the contexts the upcoming `lintel-action`
+GitHub Action targets), the scanner was iterating an empty
+`StagedFiles` slice and reporting zero findings even when committed
+files contained obvious hardcoded credentials. Gitleaks gets full-tree
+coverage on pre-push by switching to `detect`; the config-secret
+scanner now has the matching fallback.
+
+### Fixed
+
+- Config-secret scanner now enumerates the full tracked tree at HEAD
+  (`git ls-tree -r HEAD`) when invoked outside `pre-commit` (i.e.
+  `pre-push`, manual `lintel run`, CI), instead of relying on the
+  always-empty `StagedFiles` for those hooks. Pre-commit behaviour is
+  unchanged: it continues to scan only the staged diff.
+
 ## [0.2.2] - 2026-04-24
 
 Implements the SARIF output writer that lintel's CLI flag
@@ -225,7 +243,8 @@ per job.
 - External scanner binaries per your `lintel.yaml`. Lintel coordinates them
   but does not bundle or download them - install and pin each one you use.
 
-[Unreleased]: https://github.com/MHChlagou/lintel/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/MHChlagou/lintel/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/MHChlagou/lintel/releases/tag/v0.2.3
 [0.2.2]: https://github.com/MHChlagou/lintel/releases/tag/v0.2.2
 [0.2.1]: https://github.com/MHChlagou/lintel/releases/tag/v0.2.1
 [0.2.0]: https://github.com/MHChlagou/lintel/releases/tag/v0.2.0

@@ -32,7 +32,7 @@ usage() {
 Install Lintel.
 
 Flags:
-  --version <tag>          release tag (e.g. v0.2.0). Default: latest.
+  --version <tag>          release tag (e.g. v0.2.3). Default: latest.
   --install-dir <path>     destination directory. Default: /usr/local/bin.
   --no-cosign              skip cosign signature verification.
   -h, --help               show this help.

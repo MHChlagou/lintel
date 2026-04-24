@@ -9,7 +9,7 @@
   installs to $env:USERPROFILE\bin by default.
 
 .PARAMETER Version
-  Release tag to install (e.g. v0.2.0). Default: latest.
+  Release tag to install (e.g. v0.2.3). Default: latest.
 
 .PARAMETER InstallDir
   Destination directory. Default: $env:USERPROFILE\bin.
@@ -23,7 +23,7 @@
 
 .EXAMPLE
   # Pin a specific version
-  .\install.ps1 -Version v0.2.0
+  .\install.ps1 -Version v0.2.3
 
 .NOTES
   Windows locks running executables. Close any open lintel.exe processes

@@ -29,10 +29,20 @@ const maxConfigFileBytes = 1 * 1024 * 1024
 // delegated to shouldFlagAssignment below.
 //
 // On pre-commit it reads the staged blob (consistent with `gitleaks protect
-// --staged`); on pre-push / full scans it reads the HEAD blob.
+// --staged`); on pre-push / CI / manual runs it falls back to the full
+// tracked tree at HEAD, mirroring how gitleaks switches to `detect` for
+// non-staged contexts. Without that fallback, pre-push scans would walk an
+// empty StagedFiles slice and silently report no findings.
 func scanConfigSecrets(ctx context.Context, in CheckInput) ([]finding.Finding, error) {
+	files := in.StagedFiles
+	if in.Hook != "pre-commit" || in.FullTree {
+		if all, err := listTrackedFiles(ctx, in.RepoRoot); err == nil && len(all) > 0 {
+			files = all
+		}
+	}
+
 	var out []finding.Finding
-	for _, rel := range in.StagedFiles {
+	for _, rel := range files {
 		kind, ok := isConfigSecretTarget(rel)
 		if !ok {
 			continue
@@ -44,6 +54,24 @@ func scanConfigSecrets(ctx context.Context, in CheckInput) ([]finding.Finding, e
 		out = append(out, scanConfigLines(rel, kind, content)...)
 	}
 	return out, nil
+}
+
+// listTrackedFiles enumerates every file recorded at HEAD, NUL-delimited so
+// paths containing newlines or quotes survive intact. Used only when we
+// cannot rely on StagedFiles (pre-push, manual `lintel run`, CI).
+func listTrackedFiles(ctx context.Context, repoRoot string) ([]string, error) {
+	cmd := exec.CommandContext(ctx, "git", "ls-tree", "-r", "--name-only", "-z", "HEAD")
+	cmd.Dir = repoRoot
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+	raw := strings.TrimRight(out.String(), "\x00")
+	if raw == "" {
+		return nil, nil
+	}
+	return strings.Split(raw, "\x00"), nil
 }
 
 // noisyJSONBasenames lists JSON filenames that are overwhelmingly not secret
