@@ -33,7 +33,7 @@ behind your back.
 
     ```bash
     # Pin a specific version
-    curl -fsSL https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.sh | sh -s -- --version v0.2.0
+    curl -fsSL https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.sh | sh -s -- --version v0.2.2
 
     # Install into a user-local path without sudo
     LINTEL_INSTALL_DIR="$HOME/.local/bin" \
@@ -57,7 +57,7 @@ behind your back.
 
     ```powershell
     # Pin a specific version
-    $env:LINTEL_VERSION = 'v0.2.0'
+    $env:LINTEL_VERSION = 'v0.2.2'
     iwr https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.ps1 -UseBasicParsing | iex
     ```
 
@@ -111,14 +111,14 @@ after verifying the new SHA256 (and cosign signature, if available).
 
     ```bash
     curl -fsSL https://raw.githubusercontent.com/MHChlagou/lintel/main/scripts/install.sh | sh
-    # Or pin: ... | sh -s -- --version v0.2.0
+    # Or pin: ... | sh -s -- --version v0.2.2
     ```
 
 === "Go toolchain"
 
     ```bash
     go install github.com/MHChlagou/lintel/cmd/lintel@latest
-    # Or pin: go install github.com/MHChlagou/lintel/cmd/lintel@v0.2.0
+    # Or pin: go install github.com/MHChlagou/lintel/cmd/lintel@v0.2.2
     ```
 
 === "Windows (PowerShell)"
@@ -146,7 +146,7 @@ Every release ships a `.sha256` sidecar and a `.sigstore` bundle. Both are
 worth checking if you did not install via `go install`:
 
 ```bash
-ver=v0.2.0
+ver=v0.2.2
 base="https://github.com/MHChlagou/lintel/releases/download/${ver}"
 curl -fsSL "${base}/lintel-linux-amd64.sha256"   -o lintel.sha256
 curl -fsSL "${base}/lintel-linux-amd64.sigstore" -o lintel.sigstore

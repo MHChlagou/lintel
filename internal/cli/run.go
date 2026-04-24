@@ -105,6 +105,8 @@ func cmdRun() *cobra.Command {
 			switch spec.Output.Format {
 			case "json":
 				_ = report.WriteJSON(os.Stdout, summary)
+			case "sarif":
+				_ = report.WriteSARIF(os.Stdout, summary)
 			default:
 				color := shouldUseColor(spec.Output.Color, flags.noColor)
 				report.WritePretty(os.Stdout, summary, color, len(staged))

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-04-24
+
+Implements the SARIF output writer that lintel's CLI flag
+(`--output sarif`) had been advertising since 0.2.0. This unblocks
+the upcoming `lintel-action` GitHub Action: SARIF is the format
+GitHub Advanced Security ingests into the Security → Code scanning
+tab and the source of inline PR annotations.
+
+### Added
+
+- SARIF 2.1.0 output via `lintel run --output sarif`. Emits to stdout
+  so workflow steps can redirect to a file and hand the result to
+  `github/codeql-action/upload-sarif`. Deduplicates rules across
+  findings (one entry per unique `RuleID` in `tool.driver.rules`),
+  maps lintel severities to SARIF levels (`CRITICAL`/`HIGH` →
+  `error`, `MEDIUM` → `warning`, `LOW`/`INFO` → `note`), and emits
+  file / line / column locations that GitHub turns into inline PR
+  annotations. Windows path separators are normalized to forward
+  slashes so SARIF produced on Windows runners still ingests cleanly.
+
+### Fixed
+
+- `--output sarif` previously fell through to pretty-printed terminal
+  output because the writer was never implemented, despite the flag
+  being accepted by the config validator. It now emits real SARIF.
+  (`junit` remains a documented format without a writer and continues
+  to fall through to pretty; tracked for a separate release.)
+
 ## [0.2.1] - 2026-04-24
 
 Closes a gap in the `secrets` check where gitleaks' default ruleset
@@ -197,7 +225,8 @@ per job.
 - External scanner binaries per your `lintel.yaml`. Lintel coordinates them
   but does not bundle or download them - install and pin each one you use.
 
-[Unreleased]: https://github.com/MHChlagou/lintel/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/MHChlagou/lintel/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/MHChlagou/lintel/releases/tag/v0.2.2
 [0.2.1]: https://github.com/MHChlagou/lintel/releases/tag/v0.2.1
 [0.2.0]: https://github.com/MHChlagou/lintel/releases/tag/v0.2.0
 [0.1.0]: https://github.com/MHChlagou/lintel/releases/tag/v0.1.0
