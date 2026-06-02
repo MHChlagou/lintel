@@ -4,7 +4,7 @@ mkdocs-material-extensions==1.3.1
 # mike powers the version selector configured in mkdocs.yml
 # (extra.version.provider). Deploys versioned docs to gh-pages.
 mike==2.1.3
-pymdown-extensions==10.12
+pymdown-extensions==10.21.3
 # Pinned to 2.17.2 to avoid a 2.18.x regression where filename=None is
 # passed through to html.escape(), breaking pymdownx.highlight in some layouts.
 Pygments==2.17.2
