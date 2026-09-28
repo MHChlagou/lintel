@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/spf13/cobra v1.10.2
-	github.com/ulikunitz/xz v0.5.15
+	github.com/ulikunitz/xz v0.5.17
 	gopkg.in/yaml.v3 v3.0.1
 )
 
